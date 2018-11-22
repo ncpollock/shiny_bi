@@ -190,10 +190,6 @@ shinyServer(function(input, output, clientData, session) {
           })
           
           output[[inspect_histogram]] <- renderPlot({
-            # hist(file_df()[[my_i]]
-            #      ,main=paste0(my_i, ": Histogram")
-            #      ,xlab=my_i
-            #      ,col='red')
             
             ggplot(file_df(),aes(x=!!j)) +
               geom_bar() +
@@ -201,10 +197,6 @@ shinyServer(function(input, output, clientData, session) {
           })
           
           output[[inspect_bar]] <- renderPlot({
-            # barplot(table(file_df()[[my_i]])
-            #         ,main=paste0(my_i,": Counts for Each Level")
-            #         ,xlab=my_i
-            #         ,col='red')
             
             ggplot(file_df() %>% count(!!j),aes(x=!!j,y=n)) +
               geom_col() +
