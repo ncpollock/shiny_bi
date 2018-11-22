@@ -56,19 +56,19 @@ ui <- dashboardPage(
                     ))),
           
           tabItem(tabName = "explore",
-                  pageWithSidebar(
-                    headerPanel('Options'),
-                    sidebarPanel(
-                      box("Define Chart Elements",width=12,collapsible = TRUE,
-                        uiOutput("reactive_input_test"),
-                        selectInput('y_val', 'Y-Value', names(iris),
-                                    selected=names(iris)[[2]]),
-                        numericInput('clusters', 'Cluster count', 3,
-                                     min = 1, max = 9)),
-                      box("Y-Value Stats",collapsed = TRUE,collapsible = TRUE),
-                      box("Plot Type",collapsed = TRUE,collapsible = TRUE)
+                  fluidRow(
+                    column(width = 4,
+                      box(title="Define Chart Elements",width=12,collapsible = TRUE,
+                        uiOutput("plot_axes")),
+                      box(title="Y-Value Stats",width=12,collapsed = TRUE,collapsible = TRUE,
+                          selectInput("plot_stats","Y-Value Stats",
+                                      c("Count","Sum","Average","Value"))
+                          ),
+                      box(title="Plot Type",width=12,collapsed = TRUE,collapsible = TRUE,
+                          selectInput("plot_type","Plot Type",
+                                      c("Column","Bar","Line","Point")))
                     ),
-                    mainPanel(
+                    column(width=8,
                       box(title="Explore Data",status="primary",collapsible = TRUE,width=12,
                           p("Explore your data visually. This may take some trial and error to get it right!")
                     )

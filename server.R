@@ -103,10 +103,23 @@ shinyServer(function(input, output, clientData, session) {
       
     })
     
-    output$reactive_input_test <- renderUI({
-      selectInput('x_val', 'X-Value', names(file_df()))
-    })
+# explore.tab ########################################################
     
+    output$plot_axes <- renderUI({
+      list(
+      selectInput('x_var', 'X-Value', names(file_df())),
+
+      selectInput('y_var', 'Y-Value', names(file_df())),
+
+      selectInput('color_var', 'Color Group', names(file_df())),
+
+      selectInput('facet_var', 'Facet Group', names(file_df()))
+      )
+    })
+
+    
+    
+# inspect.tab ###########################################################
     output$boxes2 <- renderUI({
       
       variable_output <- lapply(names(file_df()), function(i) {
