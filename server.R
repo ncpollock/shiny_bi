@@ -4,47 +4,6 @@
 # Define server logic required to draw a datatable
 shinyServer(function(input, output, clientData, session) {
     
-    output$happiness <- renderInfoBox({
-        
-        infoBox(value="Projected Lifetime Happiness",
-                title="100%",
-                icon=icon("smile-o"),
-                color="maroon")
-    })
-    
-    output$days_until_vbox <- renderValueBox({
-        
-        valueBox(wedding_day-Sys.Date(),
-                 "Days Until Our Wedding!",
-                icon=icon("diamond"),
-                color="maroon")
-    })
-    
-    output$known_days <- renderValueBox({
-        
-        valueBox(Sys.Date()-meet_day,
-                 "Days Noah's Known Stephanie!",
-                 icon=icon("hourglass-start"),
-                 color="maroon")
-    })
-    
-    output$guest_count <- renderInfoBox({
-
-        infoBox(value=nrow(guests),
-                title="Guests Invited",
-                icon=icon("group"),
-                color="maroon")
-    })
-    
-    output$household_count <- renderInfoBox({
-        
-        infoBox(title="Households Invited",
-                nrow(households),
-                icon=icon("home"),
-                color="maroon")
-    })
-    
-    
     output$top_name <- renderValueBox({
         
         tdata <- guests %>% 
@@ -60,29 +19,6 @@ shinyServer(function(input, output, clientData, session) {
                  color="maroon")
     })
     
-    output$max_household <- renderValueBox({
-        
-        tdata <- guests %>% 
-            group_by(Household..Name) %>% 
-            summarise(counts = n())
-        
-        valueBox(paste0(max(tdata$counts)," guests"),
-                 "Largest Household",
-                 icon=icon("users"),
-                 color="maroon")
-    })
-
-    
-    output$calendar_heat <- renderPlot({
-        
-        cal_df$Date <- as.Date(cal_df$Date)
-        
-        df <- cal_df %>%
-            rename(dates = Date,
-                   counts = Count)
-        
-        gg.calendar(df)
-    })
     
     output$county_map <- renderPlot({
         
@@ -120,35 +56,6 @@ shinyServer(function(input, output, clientData, session) {
                 panel.grid.minor = element_blank(),
                 axis.line   = element_blank())
         
-    })
-    
-    output$lovecloud <- renderPlot({
-        
-        words <- c("love",
-                   "stephanie",
-                   "noah",
-                   "wedding",
-                   "marriage",
-                   "lafayette grande",
-                   "honesty",
-                   "communication",
-                   "ever after",
-                   "happiness",
-                   "strength",
-                   "family",
-                   "trust",
-                   "#justthebeginning",
-                   "together",
-                   "friendship",
-                   "joy",
-                   "compromise",
-                   "smile")
-        
-        wordcloud(words,
-                  freq=c(sample(51:150,floor(length(words)/2),replace=TRUE),
-                         sample(1:70,ceiling(length(words)/2),replace=TRUE)),
-                  # scale=c(4,.5),
-                  colors=c("red",maroon1,maroon2,"black","orange"))
     })
     
     file_df <- reactive({
@@ -194,6 +101,10 @@ shinyServer(function(input, output, clientData, session) {
       
       datatable(file_df())
       
+    })
+    
+    output$reactive_input_test <- renderUI({
+      selectInput('x_val', 'X-Value', names(file_df()))
     })
     
     output$boxes2 <- renderUI({

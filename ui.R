@@ -59,8 +59,8 @@ ui <- dashboardPage(
                   pageWithSidebar(
                     headerPanel('Options'),
                     sidebarPanel(
-                      box("Define Chart Elements",width=12,collapsible = TRUE
-                        selectInput('x_val', 'X-Value', names(iris)),
+                      box("Define Chart Elements",width=12,collapsible = TRUE,
+                        uiOutput("reactive_input_test"),
                         selectInput('y_val', 'Y-Value', names(iris),
                                     selected=names(iris)[[2]]),
                         numericInput('clusters', 'Cluster count', 3,

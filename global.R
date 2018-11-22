@@ -17,9 +17,7 @@ library(googleVis)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-library(leaflet)
 library(maps)
-library(wordcloud)
 
 custom_colors <- HTML(paste0('
                                          /* logo */
