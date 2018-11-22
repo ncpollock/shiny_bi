@@ -96,7 +96,6 @@ shinyServer(function(input, output, clientData, session) {
     })
 
     
-    
 # inspect.tab ###########################################################
     output$inspect_vars <- renderUI({
       
@@ -107,7 +106,7 @@ shinyServer(function(input, output, clientData, session) {
         textname_var <- paste("text", i, sep="")
         
         inspect_histogram <- paste0("plot1_",i)
-        inspect_bar <- paste0("plot1_",i)
+        inspect_bar <- paste0("plot2_",i)
         
         # c(
           if(is.numeric(file_df()[[i]])){
@@ -120,9 +119,12 @@ shinyServer(function(input, output, clientData, session) {
           } else {
             list(
               box(width = 12,collapsible = TRUE,collapsed = FALSE,solidHeader = TRUE,status = 'primary',
-                  title=p(strong(i),": Variable is numeric"),
+                  title=p(strong(i),": Variable is not numeric"),
               box(DT::dataTableOutput(level_counts),width=4),
               box(width=8,plotOutput(inspect_bar,width="100%",height="600px")))) }
+        
+        # could add in other checks for dates, booleans, etc
+        
           # ,list(p("Each variable gets either a plot or a table, but every variable gets this nice paragraphs.")))
       })
       local_reactive_inspect_vars()
@@ -148,7 +150,7 @@ shinyServer(function(input, output, clientData, session) {
           level_counts <- paste0("table1_", my_i)
           stat_summaries <- paste0("table2_", my_i)
           inspect_histogram <- paste0("plot1_",my_i)
-          inspect_bar <- paste0("plot1_",my_i)
+          inspect_bar <- paste0("plot2_",my_i)
           
           #initialize empty space
           output$none <- renderPlot({})
@@ -194,10 +196,14 @@ shinyServer(function(input, output, clientData, session) {
           })
           
           output[[inspect_bar]] <- renderPlot({
-            barplot(table(file_df()[[my_i]])
-                    ,main=paste0(my_i,": Counts for Each Level")
-                    ,xlab=my_i
-                    ,col='red')
+            # barplot(table(file_df()[[my_i]])
+            #         ,main=paste0(my_i,": Counts for Each Level")
+            #         ,xlab=my_i
+            #         ,col='red')
+            
+            ggplot(file_df() %>% count(!!j),aes(x=!!j,y=n)) +
+              geom_col() +
+              coord_flip()
           })
         })
       }
