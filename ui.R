@@ -32,7 +32,7 @@ ui <- dashboardPage(
                   p("This dashboard is a Business Intelligence (BI) tool built off of R using Shiny and related packages.
                       Please consider it a proof of concept rather than a fully featured BI tool. There are many freely available
                       BI tools with much richer feature sets (e.g., Microsoft Power BI, Tableau, Excel). In fact,
-                    this tool was heavily inspired by RapidMiner."),
+                    this tool was heavily inspired by RapidMiner and JMP."),
                   p("Follow the tabs to the left in numeric order to see what this dashboard can do!")
                   # https://en.wikipedia.org/wiki/Business_intelligence_software
                   # https://rapidminer.com/

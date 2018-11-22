@@ -31,7 +31,7 @@ shinyServer(function(input, output, clientData, session) {
                              diamonds = diamonds)
         
         file_df <- data.frame(
-          dataset_list[input$select_dataset])
+          dataset_list[[input$select_dataset]])
         
       } else {
         
@@ -113,7 +113,7 @@ shinyServer(function(input, output, clientData, session) {
             list(box(width = 12,collapsible = TRUE,collapsed = FALSE,solidHeader = TRUE,status = 'primary',
                        title=p(strong(i),": Variable is numeric"),
                        box(width=4,DT::dataTableOutput(stat_summaries)),
-                     box(width=8,plotOutput(inspect_histogram,width="100%",height="600px"))
+                     box(width=8,plotOutput(inspect_histogram))
                      ))
             # ))
           } else {
@@ -121,7 +121,7 @@ shinyServer(function(input, output, clientData, session) {
               box(width = 12,collapsible = TRUE,collapsed = FALSE,solidHeader = TRUE,status = 'primary',
                   title=p(strong(i),": Variable is not numeric"),
               box(DT::dataTableOutput(level_counts),width=4),
-              box(width=8,plotOutput(inspect_bar,width="100%",height="600px")))) }
+              box(width=8,plotOutput(inspect_bar)))) }
         
         # could add in other checks for dates, booleans, etc
         
@@ -185,14 +185,19 @@ shinyServer(function(input, output, clientData, session) {
                         paging = FALSE
                         ,searching = FALSE
                         ,pageLength = nrow(tdata) 
+                        ,initComplete = dt_column_head
                       ))
           })
           
           output[[inspect_histogram]] <- renderPlot({
-            hist(file_df()[[my_i]]
-                 ,main=paste0(my_i, "Histogram")
-                 ,xlab=my_i
-                 ,col='red')
+            # hist(file_df()[[my_i]]
+            #      ,main=paste0(my_i, ": Histogram")
+            #      ,xlab=my_i
+            #      ,col='red')
+            
+            ggplot(file_df(),aes(x=!!j)) +
+              geom_bar() +
+              my_theme
           })
           
           output[[inspect_bar]] <- renderPlot({
@@ -203,7 +208,8 @@ shinyServer(function(input, output, clientData, session) {
             
             ggplot(file_df() %>% count(!!j),aes(x=!!j,y=n)) +
               geom_col() +
-              coord_flip()
+              coord_flip() +
+              my_theme
           })
         })
       }

@@ -19,69 +19,77 @@ library(dplyr)
 library(tidyr)
 library(maps)
 
+# style column names / header for datatables
 dt_column_head <- JS(
   "function(settings, json) {",
   "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
   "}")
 
-custom_colors <- HTML(paste0('
-                                         /* logo */
-                             .skin-blue .main-header .logo {
-                             background-color:',maroon1,';
-                             }
-                             
-                             /* logo when hovered */
-                             .skin-blue .main-header .logo:hover {
-                             background-color:',maroon1,';
-                             }
-                             
-                             /* toggle button when hovered  */
-                             .skin-blue .main-header .navbar .sidebar-toggle:hover{
-                             background-color:',v_dark_gray,';
-                             }
-                             
-                             /* navbar (rest of the header) */
-                             .skin-blue .main-header .navbar {
-                             background-color:',maroon1,';
-                             }
-                             
-                             /* main sidebar */
-                             .skin-blue .main-sidebar {
-                             background-color:',v_dark_gray,';
-                             }
-                             
-                             .skin-blue .sidebar-menu > li:hover > a,
-                             .skin-blue .sidebar-menu > li.active > a {
-                             color: white;
-                             background:',maroon1,';
-                             border-left-color:',maroon1,';
-                             }
-                             .skin-blue .sidebar-menu > li > .treeview-menu {
-                             margin: 0 1px;
-                             background:',med_gray,';
-                             }
-                             .skin-blue .treeview-menu > li.active > a,
-                             .skin-blue .treeview-menu > li > a:hover {
-                             color: white;
-                             background:',maroon1,';
-                             }
-                             
-                             .skin-blue .sidebar a {
-                             color: white;
-                             }
-                             .skin-blue .treeview-menu > li > a {
-                             color: white;
-                             }
-                             
-                             .small-box h3 {
-                             font-size: 38px;
-                             font-weight: 700;
-                             margin: 0 0 10px;
-                             white-space: nowrap;
-                             padding: 0;
-                             }
-                             .bg-primary {
-                             color: #fff;
-                             background-color: #337ab7;
-                             }
-                             '))
+# set general theme for ggplots
+
+my_theme <- theme(panel.background = element_blank())
+
+custom_colors <- ""
+# 
+# # use custom color pallette across app
+# custom_colors <- HTML(paste0('
+#                                          /* logo */
+#                              .skin-blue .main-header .logo {
+#                              background-color:',maroon1,';
+#                              }
+#                              
+#                              /* logo when hovered */
+#                              .skin-blue .main-header .logo:hover {
+#                              background-color:',maroon1,';
+#                              }
+#                              
+#                              /* toggle button when hovered  */
+#                              .skin-blue .main-header .navbar .sidebar-toggle:hover{
+#                              background-color:',v_dark_gray,';
+#                              }
+#                              
+#                              /* navbar (rest of the header) */
+#                              .skin-blue .main-header .navbar {
+#                              background-color:',maroon1,';
+#                              }
+#                              
+#                              /* main sidebar */
+#                              .skin-blue .main-sidebar {
+#                              background-color:',v_dark_gray,';
+#                              }
+#                              
+#                              .skin-blue .sidebar-menu > li:hover > a,
+#                              .skin-blue .sidebar-menu > li.active > a {
+#                              color: white;
+#                              background:',maroon1,';
+#                              border-left-color:',maroon1,';
+#                              }
+#                              .skin-blue .sidebar-menu > li > .treeview-menu {
+#                              margin: 0 1px;
+#                              background:',med_gray,';
+#                              }
+#                              .skin-blue .treeview-menu > li.active > a,
+#                              .skin-blue .treeview-menu > li > a:hover {
+#                              color: white;
+#                              background:',maroon1,';
+#                              }
+#                              
+#                              .skin-blue .sidebar a {
+#                              color: white;
+#                              }
+#                              .skin-blue .treeview-menu > li > a {
+#                              color: white;
+#                              }
+#                              
+#                              .small-box h3 {
+#                              font-size: 38px;
+#                              font-weight: 700;
+#                              margin: 0 0 10px;
+#                              white-space: nowrap;
+#                              padding: 0;
+#                              }
+#                              .bg-primary {
+#                              color: #fff;
+#                              background-color: #337ab7;
+#                              }
+#                              '))
