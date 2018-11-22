@@ -12,14 +12,8 @@ ui <- dashboardPage(
             #      style="display: block; margin-left: auto; margin-right: auto;")
             ,HTML("<i class='fa fa-cogs' style='display:block; font-size: 50px; text-align: center;'></i>")
             ,br()
+            ,menuItem("About",tabName = "about", icon = icon("question"))
             ,menuItem("1. Upload", tabName = "upload", icon = icon("upload"))
-            # ,menuItem("2. Inspect Data", icon = icon("heartbeat"), tabName = "inspect"
-            #           # ,badgeLabel = "new", badgeColor = "green"
-            #           ,selectInput('who',
-            #                        'Learn the story of:',c('Stephanie','Noah'))
-            #           ,menuSubItem(text = "Guests", tabName = "guests",icon=icon("glass"))
-            #           ,menuSubItem(text = "Bride", tabName = "steph",icon=icon("heart"))
-            # )
             ,menuItem("2. Inspect",icon=icon("search"),tabName="inspect")
             ,menuItem("3. Explore",icon=icon("bar-chart"),tabName="explore")
             # ,plotOutput('plot_worth_putting_here')
@@ -33,6 +27,15 @@ ui <- dashboardPage(
         style="font-family: 'Roboto';",
         tags$head(tags$style(custom_colors)),
         tabItems(
+          tabItem(tabName = "about",
+                  h3("Welcome!"),
+                  p("This dashboard is a Business Intelligence (BI) tool built off of R using Shiny and related packages.
+                      Please consider it a proof of concept rather than a fully featured BI tool. There are many freely available
+                      BI tools with much richer feature sets (e.g., Microsoft Power BI, Tableau, Excel). In fact,
+                    this tool was heavily inspired by RapidMiner."),
+                  p("Follow the tabs to the left in numeric order to see what this dashboard can do!")
+                  # https://en.wikipedia.org/wiki/Business_intelligence_software
+          ),
           tabItem(tabName = "upload",
                   fluidRow(
                     box(title="Upload Data",
@@ -74,98 +77,17 @@ ui <- dashboardPage(
                     )
                   )))
                   
-            # tabItem(tabName = "overview",
-            #         fluidRow(column(12,
-            #             # Dynamic valueBoxes
-            #             infoBoxOutput("happiness"),
-            #             bsPopover("happiness",
-            #                       title="Projected Happiness",
-            #                       content=paste0("The proportion of lifetime Happiness to Unhappiness",
-            #                                      " converted to a percentage."),
-            #                       placement="bottom"),
-            #             valueBoxOutput("known_days"),
-            #             bsPopover("known_days",
-            #                       title="Days we have known each other!",
-            #                       content=paste0("That is the difference between ",
-            #                                      Sys.Date()
-            #                                      ," and "
-            #                                      ,meet_day
-            #                                      ,"!"),
-            #                       placement="bottom"),
-            #             infoBoxOutput("guest_count"),
-            #             bsPopover("guest_count",
-            #                       title="Guests at our wedding!",
-            #                       content=paste0("The number of individiaul guests",
-            #                                      " invited to our wedding."),
-            #                       placement="bottom")),
-            #             column(12,
-            #             valueBoxOutput("days_until_vbox"),
-            #             bsPopover("days_until_vbox",
-            #                       title="Days Until Our Wedding!",
-            #                       content=paste0("That is the difference between ",
-            #                                      wedding_day
-            #                                      ," and "
-            #                                      ,Sys.Date()
-            #                                      ,"!"),
-            #                       placement="bottom"),
-            #             infoBoxOutput("household_count"),
-            #             bsPopover("household_count",
-            #                       title="Households at our wedding!",
-            #                       content=paste0("The number of individual households",
-            #                                      " at our wedding."),
-            #                       placement="bottom"),
+          # tabItem(tabName = "analyze")
+                  
+          
+
             #             valueBoxOutput("top_name"),
             #             bsPopover("top_name",
             #                       title="Most popular guest name!",
             #                       content=paste0("The most frequent guest name invited",
             #                                      " to our wedding."),
             #                       placement="bottom")
-            #             
-            #             ),
-            #             column(12,
-            #                    valueBoxOutput("max_household"),
-            #                    bsPopover("max_household",
-            #                              title="Largest Household",
-            #                              content=paste0("The largest household size.",
-            #                                             " Also the average household size was ",
-            #                                             guests %>% 
-            #                                                 group_by(Household..Name) %>% 
-            #                                                 summarise(counts = n()) %>%
-            #                                                 summarise(average = mean(counts)), 
-            #                                             " average household size."),
-            #                              placement="bottom")
-            #                    
-            #             )
-            #             # bsTooltip("know_rate", "Just testing some BS", placement="top"),
-            #             
-            #         )),
-            # 
-            # tabItem(tabName = "guests",fluidRow(
-            #     box(plotOutput('county_map'))
-            #     ,box(title=p("Calendar Heatmap for",textOutput('fisc_year_out')),
-            #          width=12,
-            #          plotOutput("calendar_heat"),
-            #          p("you no render?"))
-            #     
-            #     ,box(width=12,title="Test Layout!",collapsible=TRUE,collapsed=FALSE,
-            #          column(6,
-            #                 p('Some rendered text!')),
-            #          column(6,
-            #                 p('Some more rendered text!')),
-            #          column(10,offset=1,
-            #                 p('Even more rendered text!')),
-            #          column(6,offset=3,
-            #                 p('You guessed it, more rendered text!')))
-            # )
-            # ),
-            # tabItem(tabName = "cont_ed",
-            #         h2("Continuing Ed e")
-            # ),
-            # 
-            # tabItem(tabName = "about",
-            #         h3("Welcome"),
-            #         p("Hopefully, this is the start of something beautiful.")
-            # )
+
         )
         )
 
