@@ -120,17 +120,16 @@ shinyServer(function(input, output, clientData, session) {
     
     
 # inspect.tab ###########################################################
-    output$boxes2 <- renderUI({
+    output$inspect_vars <- renderUI({
       
       variable_output <- lapply(names(file_df()), function(i) {
 
-        tablename1 <- paste0("table1_",i)
-        tablename2 <- paste0("table2_",i)
+        level_counts <- paste0("table1_",i)
+        stat_summaries <- paste0("table2_",i)
         textname_var <- paste("text", i, sep="")
         
-        # plotname <- paste("plot", i, sep="")
-        plotname1 <- paste0("plot1_",i)
-        plotname2 <- paste0("plot1_",i)
+        inspect_histogram <- paste0("plot1_",i)
+        inspect_bar <- paste0("plot1_",i)
         
         c(
           if(is.numeric(file_df()[[i]])){
@@ -139,27 +138,25 @@ shinyServer(function(input, output, clientData, session) {
                      br(),
                      p(strong(paste0("Figure ",i,":")),
                        "Can do histogram because data is numeric"),
-                     plotOutput(plotname1,width="100%",height="600px"),
-                     DT::dataTableOutput(tablename2)))
+                     plotOutput(inspect_histogram,width="100%",height="600px"),
+                     DT::dataTableOutput(stat_summaries)))
           } else {
             list(
               h2("Variable: ",textOutput(textname_var,inline=TRUE),align="center"),
-              DT::dataTableOutput(tablename1),
-              plotOutput(plotname2,width="100%",height="600px")) },
+              DT::dataTableOutput(level_counts),
+              plotOutput(inspect_bar,width="100%",height="600px")) },
           list(p("Each variable gets either a plot or a table, but every variable gets this nice paragraphs."))
         )
       })
-      test_reactive()
+      local_reactive_inspect_vars()
       do.call(tagList, variable_output)
       # }
     })
     
     
-    test_reactive <- reactive({
+    local_reactive_inspect_vars <- reactive({
       for (i in names(file_df())) {
-        # t <- try(file_df())
-        # if(!("try-error" %in% class(t))){
-        # } else {
+
         # Need local so that each item gets its own number. Without it, the value
         # of i in the renderPlot() will be the same across all instances, because
         # of when the expression is evaluated.
@@ -167,24 +164,23 @@ shinyServer(function(input, output, clientData, session) {
           my_i <- i
           j <- sym(i) # symbolize quoted variable name for use in dplyr programming
           
-          #school/college name
+          #get variable name
           textname_var <- paste("text", my_i, sep="")
-          # icollege <- sort(unique(FDS_df$college))[my_i]
           output[[textname_var]] <- renderText(my_i)
           
-          tablename1 <- paste0("table1_", my_i)
-          tablename2 <- paste0("table1_", my_i)
-          plotname1 <- paste0("plot1_",my_i)
-          plotname2 <- paste0("plot1_",my_i)
+          level_counts <- paste0("table1_", my_i)
+          stat_summaries <- paste0("table1_", my_i)
+          inspect_histogram <- paste0("plot1_",my_i)
+          inspect_bar <- paste0("plot1_",my_i)
           
           #initialize empty space
           output$none <- renderPlot({})
           
-          output[[tablename1]] <- DT::renderDataTable({
+          output[[level_counts]] <- DT::renderDataTable({
             datatable(count(file_df(),!!j),rownames = FALSE)
           })
           
-          output[[tablename2]] <- DT::renderDataTable({
+          output[[stat_summaries]] <- DT::renderDataTable({
             datatable(file_df() %>%
                         summarise(Min = min(!!j),
                                   Max = max(!!j),
@@ -196,24 +192,21 @@ shinyServer(function(input, output, clientData, session) {
                         filter(!is.na(value)),rownames = FALSE,colnames = FALSE)
           })
           
-          output[[plotname1]] <- renderPlot({
-            # hist(file_df()[[my_i]])
+          output[[inspect_histogram]] <- renderPlot({
             hist(file_df()[[my_i]]
-                 ,main=paste0("Histogram of ",my_i)
+                 ,main=paste0(my_i, "Histogram")
                  ,xlab=my_i
                  ,col='red')
           })
           
-          output[[plotname2]] <- renderPlot({
-            # hist(file_df()[[my_i]])
+          output[[inspect_bar]] <- renderPlot({
             barplot(table(file_df()[[my_i]])
-                    ,main=paste0("Histogram of ",my_i)
+                    ,main=paste0(my_i,": Counts for Each Level")
                     ,xlab=my_i
                     ,col='red')
           })
         })
       }
-      # }
     })
     
     

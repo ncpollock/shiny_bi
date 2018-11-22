@@ -55,7 +55,7 @@ ui <- dashboardPage(
                     box(title="Inspect Data",status="primary",
                         width=12,
                         p("Depending on the size of your dataset, this may take a minute or two..."),
-                        uiOutput("boxes2")
+                        uiOutput("inspect_vars")
                     ))),
           
           tabItem(tabName = "explore",
