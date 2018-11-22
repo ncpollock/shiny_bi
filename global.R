@@ -19,6 +19,11 @@ library(dplyr)
 library(tidyr)
 library(maps)
 
+dt_column_head <- JS(
+  "function(settings, json) {",
+  "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+  "}")
+
 custom_colors <- HTML(paste0('
                                          /* logo */
                              .skin-blue .main-header .logo {
