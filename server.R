@@ -131,22 +131,21 @@ shinyServer(function(input, output, clientData, session) {
         inspect_histogram <- paste0("plot1_",i)
         inspect_bar <- paste0("plot1_",i)
         
-        c(
+        # c(
           if(is.numeric(file_df()[[i]])){
             list(box(width = 12,collapsible = TRUE,collapsed = FALSE,solidHeader = TRUE,status = 'primary',
-                     br(),
-                     br(),
-                     p(strong(paste0("Figure ",i,":")),
-                       "Can do histogram because data is numeric"),
-                     plotOutput(inspect_histogram,width="100%",height="600px"),
-                     DT::dataTableOutput(stat_summaries)))
+                       title=p(strong(i),": Variable is numeric"),
+                       box(width=4,DT::dataTableOutput(stat_summaries)),
+                     box(width=8,plotOutput(inspect_histogram,width="100%",height="600px"))
+                     ))
+            # ))
           } else {
             list(
-              h2("Variable: ",textOutput(textname_var,inline=TRUE),align="center"),
-              DT::dataTableOutput(level_counts),
-              plotOutput(inspect_bar,width="100%",height="600px")) },
-          list(p("Each variable gets either a plot or a table, but every variable gets this nice paragraphs."))
-        )
+              box(width = 12,collapsible = TRUE,collapsed = FALSE,solidHeader = TRUE,status = 'primary',
+                  title=p(strong(i),": Variable is numeric"),
+              box(DT::dataTableOutput(level_counts),width=4),
+              box(width=8,plotOutput(inspect_bar,width="100%",height="600px")))) }
+          # ,list(p("Each variable gets either a plot or a table, but every variable gets this nice paragraphs.")))
       })
       local_reactive_inspect_vars()
       do.call(tagList, variable_output)
@@ -169,7 +168,7 @@ shinyServer(function(input, output, clientData, session) {
           output[[textname_var]] <- renderText(my_i)
           
           level_counts <- paste0("table1_", my_i)
-          stat_summaries <- paste0("table1_", my_i)
+          stat_summaries <- paste0("table2_", my_i)
           inspect_histogram <- paste0("plot1_",my_i)
           inspect_bar <- paste0("plot1_",my_i)
           
