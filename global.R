@@ -32,7 +32,9 @@ dt_column_head <- JS(
 
 # set general theme for ggplots
 
-my_theme <- theme(panel.background = element_blank())
+my_theme <- theme(panel.background = element_blank(),
+                  axis.text = element_text(size = '15'),
+                  axis.title = element_blank())
 
 custom_colors <- ""
 # 
