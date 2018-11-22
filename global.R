@@ -1,5 +1,4 @@
 
-
 #initialize colors
 v_light_gray <- '#a3a3a3' #'#CDCDCD'
 med_gray <- '#696969' #"#808080"
@@ -7,7 +6,13 @@ v_dark_gray <- '#323232' #'#252525'
 maroon1 <- '#24292e' # '#8c001a'
 maroon2 <- '#7d430e'
 
-# setwd("D:\\shiny_bi")
+#test color pallette
+electric_lime <- '#88D317'
+electric_blue <- '#4be0f6'
+sunshine <- '#fda302' # orange
+shadow <- '#535353'
+cyan <- '#43c0f5'
+charcoal <- '#3d3d3d'
 
 library(shiny)
 library(shinydashboard)
