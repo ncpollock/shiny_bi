@@ -35,6 +35,7 @@ ui <- dashboardPage(
                     this tool was heavily inspired by RapidMiner."),
                   p("Follow the tabs to the left in numeric order to see what this dashboard can do!")
                   # https://en.wikipedia.org/wiki/Business_intelligence_software
+                  # https://rapidminer.com/
           ),
           tabItem(tabName = "upload",
                   fluidRow(

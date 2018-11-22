@@ -176,19 +176,36 @@ shinyServer(function(input, output, clientData, session) {
           output$none <- renderPlot({})
           
           output[[level_counts]] <- DT::renderDataTable({
-            datatable(count(file_df(),!!j),rownames = FALSE)
+            datatable(count(file_df(),!!j)
+                      ,rownames = FALSE
+                      ,colnames = c(paste0(my_i," Level"),
+                                    "Count")
+                      ,options = list(dom='ftp'
+                                      ,initComplete = dt_column_head
+                                      ,search = list(regex = TRUE, caseInsensitive = FALSE)))
           })
           
           output[[stat_summaries]] <- DT::renderDataTable({
-            datatable(file_df() %>%
-                        summarise(Min = min(!!j),
-                                  Max = max(!!j),
-                                  Mean = mean(!!j),
-                                  Median = median(!!j),
-                                  Distinct = n_distinct(!!j),
-                                  Missing = sum(ifelse(is.na(!!j),1,0))) %>% 
-                        gather(stat,value) %>% 
-                        filter(!is.na(value)),rownames = FALSE,colnames = FALSE)
+            
+            tdata <- file_df() %>%
+              summarise(Min = min(!!j),
+                        Max = max(!!j),
+                        Mean = mean(!!j),
+                        Median = median(!!j),
+                        Distinct = n_distinct(!!j),
+                        Missing = sum(ifelse(is.na(!!j),1,0))) %>% 
+              gather(stat,value) %>% 
+              filter(!is.na(value))
+            
+            datatable(tdata
+                      ,rownames = FALSE
+                      ,colnames = c("Statistic",
+                                    "Value")
+                      ,options = list(
+                        paging = FALSE
+                        ,searching = FALSE
+                        ,pageLength = nrow(tdata) 
+                      ))
           })
           
           output[[inspect_histogram]] <- renderPlot({
