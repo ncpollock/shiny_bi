@@ -20,45 +20,21 @@ shinyServer(function(input, output, clientData, session) {
     })
     
     
-    output$county_map <- renderPlot({
-        
-        #by county
-        #map of michigan
-        counties <- map_data("county")
-        counties <- subset(counties, region %in% c( "michigan"))
-
-        pdata <- households %>%
-          filter(administrative_area_level_1=="Michigan") %>%
-          group_by(administrative_area_level_2) %>%
-          summarise(guests = n()) %>% 
-          mutate(administrative_area_level_2 = tolower(administrative_area_level_2)) %>%
-          mutate(pdata_counties = tolower(gsub("\\.+| county","",administrative_area_level_2))) %>%
-          full_join(counties,by=c("pdata_counties" = "subregion")) %>%
-          mutate(guests = ifelse(is.na(guests),0,guests)) %>%
-          mutate(test_cat = cut(guests,
-                                c(-Inf,0, 1, 5, 10, Inf),
-                                labels=c("0","1","2-4",'5-10','>10')))
-
-        #prove that counties from map_data and counties from google are identical
-          #after gsub.
-          #identical(sort(unique(pdata$pdata_counties)),sort(unique(counties$sub)))
-
-        ggplot(pdata, aes(x=long,y=lat,group=group)) +
-          scale_fill_manual(values=c(v_light_gray,med_gray,"black",maroon1)) +
-          geom_polygon(aes(fill=test_cat),color='white') +
-          xlab(NULL) +
-          ylab(NULL) +
-          theme(aspect.ratio = 1,
-                plot.margin=unit(c(0,5,0,0), "cm"),
-                axis.text = element_blank(),
-                axis.ticks = element_blank(),
-                panel.background = element_blank(),
-                panel.grid.minor = element_blank(),
-                axis.line   = element_blank())
-        
-    })
     
     file_df <- reactive({
+      
+      if(input$select_dataset!="Upload"){
+        
+        dataset_list <- list(starwars = starwars,
+                             PlantGrowth = PlantGrowth,
+                             iris = iris,
+                             diamonds = diamonds)
+        
+        file_df <- data.frame(
+          dataset_list[input$select_dataset])
+        
+      } else {
+        
       inFile <- input$data_file
       
       if (is.null(inFile))
@@ -69,6 +45,8 @@ shinyServer(function(input, output, clientData, session) {
                           na.strings = c("","NA","N/A"," ")
                           #,header = input$header, sep = input$sep, quote = input$quote
       )
+      }
+      
       file_df
     })
     

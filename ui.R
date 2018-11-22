@@ -46,7 +46,11 @@ ui <- dashboardPage(
                                   multiple = FALSE,
                                   accept = c("text/csv",
                                              "text/comma-separated-values,text/plain",
-                                             ".csv"))
+                                             ".csv")),
+                        h1("Don't have any data to upload?"),
+                        selectInput('select_dataset',"Choose a Dataset Instead: ",
+                                    c("Upload","starwars","PlantGrowth","iris","diamonds"),
+                                    selected = "Upload")
                         ),
                     box(solidHeader = TRUE,width=12,title = "Preview Data",status = "success",
                         dataTableOutput("full_dataset")))),
