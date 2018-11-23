@@ -102,11 +102,11 @@ shinyServer(function(input, output, clientData, session) {
       
       y_var <- input$y_var
       y_var_sym <- sym(y_var)
-      
+
       color_var <- input$color_var
       color_var_sym <- sym(color_var)
-      
-      facet_var <- input$facet_var_sym
+
+      facet_var <- input$facet_var
       facet_var_sym <- sym(facet_var)
       
       ggplot(file_df() %>% count(!!x_var_sym),aes(x=!!x_var_sym,y=n)) +
