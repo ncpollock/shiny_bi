@@ -87,14 +87,34 @@ shinyServer(function(input, output, clientData, session) {
       list(
       selectInput('x_var', 'X-Value', names(file_df())),
 
-      selectInput('y_var', 'Y-Value', names(file_df())),
+      selectInput('y_var', 'Y-Value', c("None",names(file_df()))),
 
-      selectInput('color_var', 'Color Group', names(file_df())),
+      selectInput('color_var', 'Color Group', c("None",names(file_df()))),
 
-      selectInput('facet_var', 'Facet Group', names(file_df()))
+      selectInput('facet_var', 'Facet Group', c("None",names(file_df())))
       )
     })
 
+    output$explore_chart <- renderPlot({
+      #transform text vars into symbols
+      x_var <- input$x_var
+      x_var_sym <- sym(x_var)
+      
+      y_var <- input$y_var
+      y_var_sym <- sym(y_var)
+      
+      color_var <- input$color_var
+      color_var_sym <- sym(color_var)
+      
+      facet_var <- input$facet_var_sym
+      facet_var_sym <- sym(facet_var)
+      
+      ggplot(file_df() %>% count(!!x_var_sym),aes(x=!!x_var_sym,y=n)) +
+        geom_col() +
+        coord_flip() +
+        my_theme
+
+    })
     
 # inspect.tab ###########################################################
     output$inspect_vars <- renderUI({

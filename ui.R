@@ -78,7 +78,8 @@ ui <- dashboardPage(
                     ),
                     column(width=8,
                       box(title="Explore Data",status="primary",collapsible = TRUE,width=12,
-                          p("Explore your data visually. This may take some trial and error to get it right!")
+                          # p("Explore your data visually. This may take some trial and error to get it right!"),
+                          plotOutput('explore_chart')
                     )
                   )))
                   

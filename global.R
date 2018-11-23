@@ -27,7 +27,7 @@ library(maps)
 # style column names / header for datatables
 dt_column_head <- JS(
   "function(settings, json) {",
-  "$(this.api().table().header()).css({'background-color': '#000', 'color': '#fff'});",
+  "$(this.api().table().header()).css({'background-color': '#3d3d3d', 'color': '#fff'});",
   "}")
 
 # set general theme for ggplots
