@@ -96,6 +96,9 @@ shinyServer(function(input, output, clientData, session) {
     })
 
     output$explore_chart <- renderPlot({
+      
+      plot_df <- file_df()
+      
       #transform text vars into symbols
       x_var <- input$x_var
       x_var_sym <- sym(x_var)
@@ -105,14 +108,46 @@ shinyServer(function(input, output, clientData, session) {
 
       color_var <- input$color_var
       color_var_sym <- sym(color_var)
-
+      
       facet_var <- input$facet_var
       facet_var_sym <- sym(facet_var)
       
-      ggplot(file_df() %>% count(!!x_var_sym),aes(x=!!x_var_sym,y=n)) +
+      # simplest might be if(){} else {} instead
+      plot_df <- plot_df %>%
+        mutate(x_var = !!x_var_sym,
+               y_var = ifelse(input$y_var == "None",NA,!!y_var_sym),
+               color_var = ifelse(!!color_var_sym == !!color_var_sym & #ifelse was evaluating only for the first row without this
+                                    input$color_var == "None",33,as.character(!!color_var_sym)),
+               facet_var = ifelse(!!facet_var_sym == !!facet_var_sym & 
+                                    input$facet_var == "None",33,as.character(!!facet_var_sym))) %>%
+        # combine color and facet in vector and groub_by_at
+        group_by_at(.vars = c("color_var","facet_var")) %>% 
+        count(x_var)
+      
+      ggplot(plot_df,aes(x=x_var,y=n,fill=color_var)) +
         geom_col() +
         coord_flip() +
         my_theme
+      
+      # # proof of concept, more complicated for colors and facets
+      #   # combine color and facet in vector and groub_by_at?
+      # if(input$color_var != "None"){
+      # color_var <- input$color_var
+      # color_var_sym <- sym(color_var)
+      # 
+      # plot_df <- plot_df %>%
+      #   mutate(color_var = !!color_var_sym) %>%
+      #   group_by(color_var)
+      # 
+      # } else {
+      #   plot_df <- plot_df %>%
+      #     mutate(!!color_var_sym = 1)
+      # }
+      
+      # ggplot(plot_df %>% count(!!x_var_sym),aes(x=!!x_var_sym,y=n,fill=!!color_var_sym)) +
+      #   geom_col() +
+      #   coord_flip() +
+      #   my_theme
 
     })
     
