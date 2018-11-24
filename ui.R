@@ -39,7 +39,7 @@ ui <- dashboardPage(
           ),
           tabItem(tabName = "upload",
                   fluidRow(
-                    box(title="Upload Data",
+                    box(title=p(icon("file-copy",class = "fas"),"Upload Data"),
                         width=12,
                         p("Only a true CSV file with headers will work with this tool."),
                         fileInput("data_file", "Choose a CSV File",
@@ -47,11 +47,14 @@ ui <- dashboardPage(
                                   accept = c("text/csv",
                                              "text/comma-separated-values,text/plain",
                                              ".csv")),
-                        h1("Don't have any data to upload?"),
+                        h4("Don't have any data to upload?"),
                         selectInput('select_dataset',"Choose a Dataset Instead: ",
                                     c("Upload","starwars","PlantGrowth","iris","diamonds"),
-                                    selected = "diamonds")
+                                    selected = "Upload")
                         ),
+                    infoBoxOutput('file_columns'),
+                    infoBoxOutput('file_rows'),
+                    infoBoxOutput('file_size'),
                     box(solidHeader = TRUE,width=12,title = "Preview Data",status = "success",
                         dataTableOutput("full_dataset")))),
           
@@ -66,23 +69,23 @@ ui <- dashboardPage(
           tabItem(tabName = "explore",
                   fluidRow(
                     column(width = 4,
-                      box(title="Define Chart Elements",width=12,collapsible = TRUE,
-                        uiOutput("plot_axes")),
+                      box(title="Plot Type",width=12,collapsible = TRUE,
+                      selectInput("plot_type","Plot Type",
+                                  c("Bar","Boxplot","Column","Heatmap","Line","Point"),
+                                  selected = "Column")),
+                      box(title="Plot Axes and Groups",width=12,collapsible = TRUE,
+                          uiOutput("plot_axes")),
                       box(title="Y-Value Stats",width=12,collapsed = TRUE,collapsible = TRUE,
                           selectInput("plot_stats","Y-Value Stats",
                                       c("Sum","Average","Value"),
-                                      selected = "Value")
-                          ),
-                      box(title="Plot Type",width=12,collapsed = TRUE,collapsible = TRUE,
-                          selectInput("plot_type","Plot Type",
-                                      c("Boxplot","Column","Heatmap","Line","Point"),
-                                      selected = "Column"))
+                                      selected = "Value"))
                     ),
                     column(width=8,
                       box(title="Explore Data",status="primary",collapsible = TRUE,width=12,
-                          # p("Explore your data visually. This may take some trial and error to get it right!"),
+                          p("Explore your data visually. This may take some trial and error to get it right!"),
                           plotOutput('explore_chart'),
-                          dataTableOutput("explore_chart_table")
+                          hr(syle = "color: black; hieght = 50px")
+                          # dataTableOutput("explore_chart_table")
                     )
                   )))
                   

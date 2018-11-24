@@ -4,23 +4,6 @@
 # Define server logic required to draw a datatable
 shinyServer(function(input, output, clientData, session) {
     
-    output$top_name <- renderValueBox({
-        
-        tdata <- guests %>% 
-            group_by(First.Name) %>% 
-            filter(First.Name != "Guest") %>%
-            summarise(name_count = n()) %>% 
-            arrange(desc(name_count)) %>%
-            top_n(1)
-        
-        valueBox(tdata$First.Name,
-                 "Most Popular Guest Name",
-                 icon=icon("vcard-o"),
-                 color="maroon")
-    })
-    
-    
-    
     file_df <- reactive({
       
       if(input$select_dataset!="Upload"){
@@ -50,35 +33,42 @@ shinyServer(function(input, output, clientData, session) {
       file_df
     })
     
-    # data_df <- reactive({
-    #   inFile <- input$data_file
-    #   
-    #   if (is.null(file_df()))
-    #     return(NULL)
-    # 
-    #   # data_df <- file_df() %>%
-    #     
-    # })
-    
     output$full_dataset <- renderDataTable({
-      
-      # js <- "function(data, type, full){ return '<span class=spark>' + data + '</span>' }"
-      # colDefs2 <- list(list(targets = c(1:6), render = JS(js)))
-      # bar_string <- "type: 'bar', barColor: 'orange', negBarColor: 'purple', highlightColor: 'black'"
-      # cb_bar <- JS(paste0("function (oSettings, json) { $('.spark:not(:has(canvas))').sparkline('html', { ",
-      #                     bar_string, " }); }"), collapse = "")
-      # 
-      # data_df <- file_df() %>%
-      #   filter(dat, Var == "Temperature") %>% group_by(Decade, Month) %>% summarise(Temperature = paste(Val,
-      #                                                                                                   collapse = ","))
-      # 
-      # d1 <- datatable(file_df(), rownames = FALSE, options = list(columnDefs = colDefs2,
-      #                                                       fnDrawCallback = cb_bar))
-      # d1$dependencies <- append(d1$dependencies, htmlwidgets:::getDependency("sparkline"))
-      # d1
       
       datatable(file_df())
       
+    })
+    
+    output$file_columns <- renderInfoBox({
+      
+      tdata <- ifelse(is.null(file_df()),0,ncol(file_df()))
+      
+      infoBox(tdata,
+               title = "Number of Columns",
+               icon=icon("columns"),
+               color="blue")
+    })
+    
+    output$file_rows <- renderInfoBox({
+      
+      tdata <- ifelse(is.null(file_df()),0,nrow(file_df()))
+      
+      infoBox(tdata,
+               title = "Number of Rows",
+               icon=icon("align-justify"),
+               color="blue")
+    })
+    
+    output$file_size <- renderInfoBox({
+      
+      tdata <- ifelse(is.null(file_df()),0,
+                      format(object.size(file_df()),units="b"))
+
+      infoBox(value = p(tdata,br(),
+              format(object.size(file_df()),units="Mb")),
+               title="Dataset Size",
+               icon=icon("expand-arrows-alt"),
+               color="blue")
     })
     
 # explore.tab ########################################################
@@ -152,23 +142,31 @@ shinyServer(function(input, output, clientData, session) {
         gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var,group=color_var,color=color_var))
       }
       if(input$y_var != "None" &
-         input$plot_stats == "Mean"){
-        plot_df <- summarise(plot_df,y_var = mean(!!y_var))
+         input$plot_stats == "Average"){
+        plot_df <- summarise(plot_df,y_var = mean(!!y_var_sym))
         gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var,group=color_var,color=color_var))
       }
       if(input$y_var != "None" &
          input$plot_stats == "Sum"){
-        plot_df <- summarise(plot_df,y_var = sum(!!y_var))
+        plot_df <- summarise(plot_df,y_var = sum(!!y_var_sym))
         gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var,group=color_var,color=color_var))
       }
+      
+      # apply facet if applicable
+      if(input$facet_var != "None") gp <- gp + facet_wrap(~facet_var)
       
       # remove legend if not grouped
       # need a solution for when faceted but not colored!
       if(!(plot_df %>% is.grouped_df())) gp <- gp + guides(fill=FALSE)
       
-      # apply chosen plot type
+      # fix axis labels
+      gp <- gp + 
+        xlab(input$x_var) +
+        ylab(ifelse(input$y_var=="None","Frequency",input$y_var))
       
+      # apply chosen plot type
       if(input$plot_type == "Column") gp <- gp + geom_col()
+      if(input$plot_type == "Bar") gp <- gp + geom_col() + coord_flip()
       if(input$plot_type == "Heatmap") gp <- gp + geom_bin2d()
       if(input$plot_type == "Boxplot") gp <- gp + geom_boxplot()
       if(input$plot_type == "Line") gp <- gp + geom_line()
@@ -177,38 +175,15 @@ shinyServer(function(input, output, clientData, session) {
       #apply custom theme
       gp <- gp + my_theme
       gp
-      # ggplot(plot_df,aes(x=x_var,y=n,fill=color_var)) +
-      #   facet_grid(~facet_var) +
-      #   geom_col() +
-      #   coord_flip() +
-      #   my_theme
-      
-      # # proof of concept, more complicated for colors and facets
-      #   # combine color and facet in vector and groub_by_at?
-      # if(input$color_var != "None"){
-      # color_var <- input$color_var
-      # color_var_sym <- sym(color_var)
-      # 
-      # plot_df <- plot_df %>%
-      #   mutate(color_var = !!color_var_sym) %>%
-      #   group_by(color_var)
-      # 
-      # } else {
-      #   plot_df <- plot_df %>%
-      #     mutate(!!color_var_sym = 1)
-      # }
-      
-      # ggplot(plot_df %>% count(!!x_var_sym),aes(x=!!x_var_sym,y=n,fill=!!color_var_sym)) +
-      #   geom_col() +
-      #   coord_flip() +
-      #   my_theme
-
+     
     })
     
     output$explore_chart_table <- renderDataTable({
+      
+      # eventually allow the user to choose specific points?
       plot_df <- file_df()
       
-      #transform text vars into symbols
+      #transform text vars into symbols for dplyr programming
       x_var <- input$x_var
       x_var_sym <- sym(x_var)
       
@@ -223,12 +198,6 @@ shinyServer(function(input, output, clientData, session) {
       
       # simplest might be if(){} else {} instead
       plot_df <- plot_df %>%
-        # mutate(x_var = !!x_var_sym,
-        #        y_var = ifelse(input$y_var == "None",NA,!!y_var_sym),
-        #        color_var = ifelse(!!color_var_sym == !!color_var_sym & #ifelse was evaluating only for the first row without this
-        #                             input$color_var == "None",33,as.character(!!color_var_sym)),
-        #        facet_var = ifelse(!!facet_var_sym == !!facet_var_sym & 
-        #                             input$facet_var == "None",33,as.character(!!facet_var_sym)))
         mutate(x_var = !!x_var_sym,
                y_var = ifelse(rep(TRUE,nrow(plot_df)) & #so ifelse evaluates for every row
                                 input$y_var=="None",1,!!y_var_sym),
@@ -256,13 +225,14 @@ shinyServer(function(input, output, clientData, session) {
       }
       if(input$y_var != "None" &
          input$plot_stats == "Value"){
-        gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var))
       }
       if(input$y_var != "None" &
-         input$plot_stats != "Value"){
-        plot_df <- summarise(plot_df,
-                             Mean = mean(!!y_var),
-                             Sum = sum(!!y_var))
+         input$plot_stats == "Average"){
+        plot_df <- summarise(plot_df,y_var = mean(!!y_var_sym))
+      }
+      if(input$y_var != "None" &
+         input$plot_stats == "Sum"){
+        plot_df <- summarise(plot_df,y_var = sum(!!y_var_sym))
       }
       datatable(plot_df)
     })

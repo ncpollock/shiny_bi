@@ -31,11 +31,15 @@ dt_column_head <- JS(
   "}")
 
 # set general theme for ggplots
-
 my_theme <- theme(panel.background = element_blank(),
                   axis.text = element_text(size = '15'),
-                  axis.title = element_blank(),
-                  legend.position = "bottom")
+                  axis.title = element_text(size = '18'),
+                  axis.line = element_line(color = 'black'),
+                  strip.background = element_rect(fill = 'black'),
+                  strip.text = element_text(color = 'white',size = '18'),
+                  legend.position = "bottom",
+                  legend.text = element_text(size = '18'),
+                  legend.title = element_blank())
 
 custom_colors <- ""
 # 
