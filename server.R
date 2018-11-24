@@ -87,19 +87,26 @@ shinyServer(function(input, output, clientData, session) {
       list(
       selectInput('x_var', 'X-Value', names(file_df())),
 
-      selectInput('y_var', 'Y-Value', c("None",names(file_df()))),
+      selectInput('y_var', 'Y-Value',
+                  c("None",names(select_if(file_df(),
+                                           is.numeric)))),
 
-      selectInput('color_var', 'Color Group', c("None",names(file_df()))),
+      selectInput('color_var', 'Color Group',c("None",names(file_df()))),
 
-      selectInput('facet_var', 'Facet Group', c("None",names(file_df())))
+      selectInput('facet_var', 'Facet Group', 
+                  c("None",names(select_if(file_df(),
+                                           function(col) is.character(col)|is.factor(col)))))
       )
     })
 
     output$explore_chart <- renderPlot({
       
+      # there's probably better ways to accomplish this
+      # i have a lot of conditional logic that repeats code
+      
       plot_df <- file_df()
       
-      #transform text vars into symbols
+      #transform text vars into symbols for dplyr programming
       x_var <- input$x_var
       x_var_sym <- sym(x_var)
       
@@ -114,12 +121,6 @@ shinyServer(function(input, output, clientData, session) {
       
       # simplest might be if(){} else {} instead
       plot_df <- plot_df %>%
-        # mutate(x_var = !!x_var_sym,
-        #        y_var = ifelse(input$y_var == "None",NA,!!y_var_sym),
-        #        color_var = ifelse(!!color_var_sym == !!color_var_sym & #ifelse was evaluating only for the first row without this
-        #                             input$color_var == "None",33,as.character(!!color_var_sym)),
-        #        facet_var = ifelse(!!facet_var_sym == !!facet_var_sym & 
-        #                             input$facet_var == "None",33,as.character(!!facet_var_sym)))
         mutate(x_var = !!x_var_sym,
                y_var = ifelse(rep(TRUE,nrow(plot_df)) & #so ifelse evaluates for every row
                                 input$y_var=="None",1,!!y_var_sym),
@@ -139,14 +140,48 @@ shinyServer(function(input, output, clientData, session) {
         
       plot_df <- plot_df %>%
       # combine color and facet in vector and groub_by_at
-        group_by_at(.vars = group_vars) %>% 
-        count(x_var)
+        group_by_at(.vars = group_vars)
       
-      ggplot(plot_df,aes(x=x_var,y=n,fill=color_var)) +
-        facet_grid(~facet_var) +
-        geom_col() +
-        coord_flip() +
-        my_theme
+      # apply chosen stat and init ggplot
+      if(input$y_var == "None"){
+        plot_df <- count(plot_df,x_var)
+        gp <- ggplot(plot_df,aes(x=x_var,y=n,fill=color_var,group=color_var,color=color_var))
+      }
+      if(input$y_var != "None" &
+         input$plot_stats == "Value"){
+        gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var,group=color_var,color=color_var))
+      }
+      if(input$y_var != "None" &
+         input$plot_stats == "Mean"){
+        plot_df <- summarise(plot_df,y_var = mean(!!y_var))
+        gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var,group=color_var,color=color_var))
+      }
+      if(input$y_var != "None" &
+         input$plot_stats == "Sum"){
+        plot_df <- summarise(plot_df,y_var = sum(!!y_var))
+        gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var,group=color_var,color=color_var))
+      }
+      
+      # remove legend if not grouped
+      # need a solution for when faceted but not colored!
+      if(!(plot_df %>% is.grouped_df())) gp <- gp + guides(fill=FALSE)
+      
+      # apply chosen plot type
+      
+      if(input$plot_type == "Column") gp <- gp + geom_col()
+      if(input$plot_type == "Heatmap") gp <- gp + geom_bin2d()
+      if(input$plot_type == "Boxplot") gp <- gp + geom_boxplot()
+      if(input$plot_type == "Line") gp <- gp + geom_line()
+      if(input$plot_type == "Point") gp <- gp + geom_point()
+      
+      #apply custom theme
+      gp <- gp + my_theme
+      gp
+      # ggplot(plot_df,aes(x=x_var,y=n,fill=color_var)) +
+      #   facet_grid(~facet_var) +
+      #   geom_col() +
+      #   coord_flip() +
+      #   my_theme
       
       # # proof of concept, more complicated for colors and facets
       #   # combine color and facet in vector and groub_by_at?
@@ -188,12 +223,18 @@ shinyServer(function(input, output, clientData, session) {
       
       # simplest might be if(){} else {} instead
       plot_df <- plot_df %>%
-         mutate(x_var = !!x_var_sym,
-               y_var = ifelse(!!x_var == !!x_var & #so ifelse evaluates for every row
+        # mutate(x_var = !!x_var_sym,
+        #        y_var = ifelse(input$y_var == "None",NA,!!y_var_sym),
+        #        color_var = ifelse(!!color_var_sym == !!color_var_sym & #ifelse was evaluating only for the first row without this
+        #                             input$color_var == "None",33,as.character(!!color_var_sym)),
+        #        facet_var = ifelse(!!facet_var_sym == !!facet_var_sym & 
+        #                             input$facet_var == "None",33,as.character(!!facet_var_sym)))
+        mutate(x_var = !!x_var_sym,
+               y_var = ifelse(rep(TRUE,nrow(plot_df)) & #so ifelse evaluates for every row
                                 input$y_var=="None",1,!!y_var_sym),
                color_var = ifelse(rep(TRUE,nrow(plot_df)) & 
                                     input$color_var == "None","None",as.character(!!color_var_sym)),
-               facet_var = ifelse(rep(TRUE,nrow(plot_df)) &
+               facet_var = ifelse(rep(TRUE,nrow(plot_df)) & 
                                     input$facet_var=="None","None",as.character(!!facet_var_sym)))
       
       # put color and facet groups into vector for grouping
@@ -207,8 +248,22 @@ shinyServer(function(input, output, clientData, session) {
       
       plot_df <- plot_df %>%
         # combine color and facet in vector and groub_by_at
-        group_by_at(.vars = group_vars) %>% 
-        count(x_var)
+        group_by_at(.vars = group_vars)
+      
+      # apply chosen stat and init ggplot
+      if(input$y_var == "None"){
+        plot_df <- count(plot_df,x_var)
+      }
+      if(input$y_var != "None" &
+         input$plot_stats == "Value"){
+        gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var))
+      }
+      if(input$y_var != "None" &
+         input$plot_stats != "Value"){
+        plot_df <- summarise(plot_df,
+                             Mean = mean(!!y_var),
+                             Sum = sum(!!y_var))
+      }
       datatable(plot_df)
     })
     
