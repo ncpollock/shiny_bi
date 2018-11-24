@@ -70,11 +70,13 @@ ui <- dashboardPage(
                         uiOutput("plot_axes")),
                       box(title="Y-Value Stats",width=12,collapsed = TRUE,collapsible = TRUE,
                           selectInput("plot_stats","Y-Value Stats",
-                                      c("Count","Sum","Average","Value"))
+                                      c("Sum","Average","Value"),
+                                      selected = "Value")
                           ),
                       box(title="Plot Type",width=12,collapsed = TRUE,collapsible = TRUE,
                           selectInput("plot_type","Plot Type",
-                                      c("Column","Bar","Line","Point")))
+                                      c("Boxplot","Column","Heatmap","Line","Point"),
+                                      selected = "Column"))
                     ),
                     column(width=8,
                       box(title="Explore Data",status="primary",collapsible = TRUE,width=12,
