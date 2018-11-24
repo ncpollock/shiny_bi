@@ -34,7 +34,8 @@ dt_column_head <- JS(
 
 my_theme <- theme(panel.background = element_blank(),
                   axis.text = element_text(size = '15'),
-                  axis.title = element_blank())
+                  axis.title = element_blank(),
+                  legend.position = "bottom")
 
 custom_colors <- ""
 # 
