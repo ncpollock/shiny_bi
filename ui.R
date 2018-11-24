@@ -50,7 +50,7 @@ ui <- dashboardPage(
                         h1("Don't have any data to upload?"),
                         selectInput('select_dataset',"Choose a Dataset Instead: ",
                                     c("Upload","starwars","PlantGrowth","iris","diamonds"),
-                                    selected = "Upload")
+                                    selected = "diamonds")
                         ),
                     box(solidHeader = TRUE,width=12,title = "Preview Data",status = "success",
                         dataTableOutput("full_dataset")))),
@@ -79,7 +79,8 @@ ui <- dashboardPage(
                     column(width=8,
                       box(title="Explore Data",status="primary",collapsible = TRUE,width=12,
                           # p("Explore your data visually. This may take some trial and error to get it right!"),
-                          plotOutput('explore_chart')
+                          plotOutput('explore_chart'),
+                          dataTableOutput("explore_chart_table")
                     )
                   )))
                   
