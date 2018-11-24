@@ -114,17 +114,36 @@ shinyServer(function(input, output, clientData, session) {
       
       # simplest might be if(){} else {} instead
       plot_df <- plot_df %>%
+        # mutate(x_var = !!x_var_sym,
+        #        y_var = ifelse(input$y_var == "None",NA,!!y_var_sym),
+        #        color_var = ifelse(!!color_var_sym == !!color_var_sym & #ifelse was evaluating only for the first row without this
+        #                             input$color_var == "None",33,as.character(!!color_var_sym)),
+        #        facet_var = ifelse(!!facet_var_sym == !!facet_var_sym & 
+        #                             input$facet_var == "None",33,as.character(!!facet_var_sym)))
         mutate(x_var = !!x_var_sym,
-               y_var = ifelse(input$y_var == "None",NA,!!y_var_sym),
-               color_var = ifelse(!!color_var_sym == !!color_var_sym & #ifelse was evaluating only for the first row without this
-                                    input$color_var == "None",33,as.character(!!color_var_sym)),
-               facet_var = ifelse(!!facet_var_sym == !!facet_var_sym & 
-                                    input$facet_var == "None",33,as.character(!!facet_var_sym))) %>%
-        # combine color and facet in vector and groub_by_at
-        group_by_at(.vars = c("color_var","facet_var")) %>% 
+               y_var = ifelse(rep(TRUE,nrow(plot_df)) & #so ifelse evaluates for every row
+                                input$y_var=="None",1,!!y_var_sym),
+               color_var = ifelse(rep(TRUE,nrow(plot_df)) & 
+                                    input$color_var == "None","None",as.character(!!color_var_sym)),
+               facet_var = ifelse(rep(TRUE,nrow(plot_df)) & 
+                                    input$facet_var=="None","None",as.character(!!facet_var_sym)))
+      
+      # put color and facet groups into vector for grouping
+      group_vars <- NULL
+      if(input$color_var != "None"){
+        group_vars <- c(group_vars,"color_var")
+        }
+      if(input$facet_var != "None"){ 
+        group_vars <- c(group_vars,"facet_var")
+        }
+        
+      plot_df <- plot_df %>%
+      # combine color and facet in vector and groub_by_at
+        group_by_at(.vars = group_vars) %>% 
         count(x_var)
       
       ggplot(plot_df,aes(x=x_var,y=n,fill=color_var)) +
+        facet_grid(~facet_var) +
         geom_col() +
         coord_flip() +
         my_theme
@@ -149,6 +168,48 @@ shinyServer(function(input, output, clientData, session) {
       #   coord_flip() +
       #   my_theme
 
+    })
+    
+    output$explore_chart_table <- renderDataTable({
+      plot_df <- file_df()
+      
+      #transform text vars into symbols
+      x_var <- input$x_var
+      x_var_sym <- sym(x_var)
+      
+      y_var <- input$y_var
+      y_var_sym <- sym(y_var)
+      
+      color_var <- input$color_var
+      color_var_sym <- sym(color_var)
+      
+      facet_var <- input$facet_var
+      facet_var_sym <- sym(facet_var)
+      
+      # simplest might be if(){} else {} instead
+      plot_df <- plot_df %>%
+         mutate(x_var = !!x_var_sym,
+               y_var = ifelse(!!x_var == !!x_var & #so ifelse evaluates for every row
+                                input$y_var=="None",1,!!y_var_sym),
+               color_var = ifelse(rep(TRUE,nrow(plot_df)) & 
+                                    input$color_var == "None","None",as.character(!!color_var_sym)),
+               facet_var = ifelse(rep(TRUE,nrow(plot_df)) &
+                                    input$facet_var=="None","None",as.character(!!facet_var_sym)))
+      
+      # put color and facet groups into vector for grouping
+      group_vars <- NULL
+      if(input$color_var != "None"){
+        group_vars <- c(group_vars,"color_var")
+      }
+      if(input$facet_var != "None"){ 
+        group_vars <- c(group_vars,"facet_var")
+      }
+      
+      plot_df <- plot_df %>%
+        # combine color and facet in vector and groub_by_at
+        group_by_at(.vars = group_vars) %>% 
+        count(x_var)
+      datatable(plot_df)
     })
     
 # inspect.tab ###########################################################
