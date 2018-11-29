@@ -195,7 +195,7 @@ shinyServer(function(input, output, clientData, session) {
       facet_var <- input$facet_var
       facet_var_sym <- sym(facet_var)
       
-      # simplest might be if(){} else {} instead
+      # create dataframe for plots
       plot_df <- plot_df %>%
         mutate(x_var = !!x_var_sym,
                y_var = ifelse(rep(TRUE,nrow(plot_df)) & #so ifelse evaluates for every row
@@ -253,7 +253,11 @@ shinyServer(function(input, output, clientData, session) {
             list(box(width = 12,collapsible = TRUE,collapsed = FALSE,solidHeader = TRUE,status = 'primary',
                        title=p(strong(i),": Variable is numeric"),
                        box(width=4,DT::dataTableOutput(stat_summaries)),
-                     box(width=8,plotOutput(inspect_histogram))
+                     box(width=8,plotOutput(inspect_histogram),
+                         sliderInput(paste0("inspect_bin",i),
+                                     "Bins:",
+                                     min = 1,  max = nrow(file_df()),value = 2*nrow(file_df())^(1/3)
+                                     ))
                      ))
             # ))
           } else {
@@ -331,9 +335,23 @@ shinyServer(function(input, output, clientData, session) {
           
           output[[inspect_histogram]] <- renderPlot({
             
-            ggplot(file_df(),aes(x=!!j)) +
-              geom_bar() +
-              my_theme
+            plot_grid(ggplot(file_df(),aes(x=!!j)) +
+                        geom_histogram(bins = input[[paste0("inspect_bin",my_i)]]) +
+                        geom_vline(aes(xintercept = median(!!j),color="median"),size = 1.7) +
+                        geom_vline(aes(xintercept = mean(!!j),color="mean"),size = 2) +
+                        scale_color_manual(name = "Stats", values = c(median = "black", mean = "orange")) +
+                        my_theme +
+                        theme(legend.position = 'top'),
+                      ggplot(file_df(),aes(x=!!j)) +
+                        geom_boxplot(aes(y=!!j,x=1),fill = "gray50") +
+                        coord_flip() +
+                        my_theme +
+                        theme(axis.text = element_blank(),
+                              axis.title.y = element_blank()),
+                      rel_heights=c(3,1),
+                      align = "v",
+                      nrow = 2
+            )
           })
           
           output[[inspect_bar]] <- renderPlot({

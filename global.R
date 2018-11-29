@@ -23,6 +23,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(maps)
+library(cowplot)
 
 # style column names / header for datatables
 dt_column_head <- JS(
