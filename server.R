@@ -142,7 +142,9 @@ shinyServer(function(input, output, clientData, session) {
       }
       if(input$y_var != "None" &
          input$plot_stats == "Average"){
-        plot_df <- summarise(plot_df,y_var = mean(!!y_var_sym))
+        plot_df <- plot_df %>%
+          group_by_at(.vars = vars(x_var,group_vars)) %>%
+          summarise(y_var = mean(!!y_var_sym))
         gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var,group=color_var,color=color_var))
       }
       if(input$y_var != "None" &
@@ -161,7 +163,7 @@ shinyServer(function(input, output, clientData, session) {
       # fix axis labels
       gp <- gp + 
         xlab(input$x_var) +
-        ylab(ifelse(input$y_var=="None","Frequency",input$y_var))
+        ylab(ifelse(input$y_var=="None","Frequency",""))
       
       # apply chosen plot type
       if(input$plot_type == "Column") gp <- gp + geom_col()
