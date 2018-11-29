@@ -49,7 +49,7 @@ ui <- dashboardPage(
                                              ".csv")),
                         h4("Don't have any data to upload?"),
                         selectInput('select_dataset',"Choose a Dataset Instead: ",
-                                    c("Upload","starwars","PlantGrowth","iris","diamonds"),
+                                    c("Upload","iris","diamonds","PlantGrowth"),
                                     selected = "Upload")
                         ),
                     infoBoxOutput('file_columns'),

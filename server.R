@@ -8,8 +8,7 @@ shinyServer(function(input, output, clientData, session) {
       
       if(input$select_dataset!="Upload"){
         
-        dataset_list <- list(starwars = starwars,
-                             PlantGrowth = PlantGrowth,
+        dataset_list <- list(PlantGrowth = PlantGrowth,
                              iris = iris,
                              diamonds = diamonds)
         
