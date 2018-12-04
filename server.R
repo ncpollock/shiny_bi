@@ -8,9 +8,12 @@ shinyServer(function(input, output, clientData, session) {
       
       if(input$select_dataset!="Upload"){
         
+        pg_outcomes = read.csv("air_df.csv",stringsAsFactors = FALSE)
+        
         dataset_list <- list(PlantGrowth = PlantGrowth,
                              iris = iris,
-                             diamonds = diamonds)
+                             diamonds = diamonds,
+                             "Post-Grad Outcomes" = pg_outcomes)
         
         file_df <- data.frame(
           dataset_list[[input$select_dataset]])
@@ -314,10 +317,10 @@ shinyServer(function(input, output, clientData, session) {
           output[[stat_summaries]] <- DT::renderDataTable({
             
             tdata <- file_df() %>%
-              summarise(Min = min(!!j),
-                        Max = max(!!j),
-                        Mean = mean(!!j),
-                        Median = median(!!j),
+              summarise(Min = min(!!j,na.rm = TRUE),
+                        Max = max(!!j,na.rm = TRUE),
+                        Mean = mean(!!j,na.rm = TRUE),
+                        Median = median(!!j,na.rm = TRUE),
                         Distinct = n_distinct(!!j),
                         Missing = sum(ifelse(is.na(!!j),1,0))) %>% 
               gather(stat,value) %>% 
