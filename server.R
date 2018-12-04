@@ -261,7 +261,8 @@ shinyServer(function(input, output, clientData, session) {
                      box(width=8,plotOutput(inspect_histogram),
                          sliderInput(paste0("inspect_bin",i),
                                      "Bins:",
-                                     min = 1,  max = nrow(file_df()),value = 2*nrow(file_df())^(1/3)
+                                     # should be number of non-missing values, not number of rows...
+                                     min = 1,  max = 50,value = ifelse(2*nrow(file_df())^(1/3)>50,50,2*nrow(file_df())^(1/3))
                                      ))
                      ))
             # ))

@@ -104,19 +104,17 @@ ui <- dashboardPage(
                          tags$ul(
                            tags$li("Major improvements to graphing (it barely works as is)."),
                            tags$li("Analyze tab where the user can input variables into statistical models."),
-                           tags$li("Toggle variable types (e.g., convert numeric to string and vice versa.")
+                           tags$li("Toggle variable types (e.g., convert numeric to string and vice versa."),
+                           tags$li("Allow the user to create new variables (e.g., transformations / mutations).")
                          )
                          )))
                   
           # tabItem(tabName = "analyze")
-                  
-          
 
             #             valueBoxOutput("top_name"),
             #             bsPopover("top_name",
-            #                       title="Most popular guest name!",
-            #                       content=paste0("The most frequent guest name invited",
-            #                                      " to our wedding."),
+            #                       title="This is the title!",
+            #                       content=paste0("This is the content"),
             #                       placement="bottom")
 
         )
