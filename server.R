@@ -342,8 +342,8 @@ shinyServer(function(input, output, clientData, session) {
             
             plot_grid(ggplot(file_df(),aes(x=!!j)) +
                         geom_histogram(bins = input[[paste0("inspect_bin",my_i)]]) +
-                        geom_vline(aes(xintercept = median(!!j),color="median"),size = 1.7) +
-                        geom_vline(aes(xintercept = mean(!!j),color="mean"),size = 2) +
+                        geom_vline(aes(xintercept = median(!!j,na.rm = TRUE),color="median"),size = 1.7) +
+                        geom_vline(aes(xintercept = mean(!!j,na.rm = TRUE),color="mean"),size = 2) +
                         scale_color_manual(name = "Stats", values = c(median = "black", mean = "orange")) +
                         my_theme +
                         theme(legend.position = 'top'),

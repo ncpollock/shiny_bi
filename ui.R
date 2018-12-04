@@ -14,6 +14,7 @@ ui <- dashboardPage(
             ,menuItem("1. Upload", tabName = "upload", icon = icon("upload"))
             ,menuItem("2. Inspect",icon=icon("search"),tabName="inspect")
             ,menuItem("3. Explore",icon=icon("bar-chart"),tabName="explore")
+            ,menuItem("Wishlist",icon=icon("gift"),tabName="wishlist")
             ,br()
             ,br()
             ,p("Developed by: ",
@@ -94,6 +95,18 @@ ui <- dashboardPage(
                           # dataTableOutput("explore_chart_table")
                     )
                   )))
+          
+          ,tabItem("wishlist",
+                   fluidRow(
+                     box(status="primary",
+                         width=12,
+                         h1("Future updates on the wishlist:"),
+                         tags$ul(
+                           tags$li("Major improvements to graphing (it barely works as is)."),
+                           tags$li("Analyze tab where the user can input variables into statistical models."),
+                           tags$li("Toggle variable types (e.g., convert numeric to string and vice versa.")
+                         )
+                         )))
                   
           # tabItem(tabName = "analyze")
                   
