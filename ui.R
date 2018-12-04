@@ -8,15 +8,20 @@ ui <- dashboardPage(
     sidebar <- dashboardSidebar(
         sidebarMenu(
             br()
-            # ,img(src="hammick.jpg",height=60,width=100,
-            #      style="display: block; margin-left: auto; margin-right: auto;")
             ,HTML("<i class='fa fa-cogs' style='display:block; font-size: 50px; text-align: center;'></i>")
             ,br()
             ,menuItem("About",tabName = "about", icon = icon("question"))
             ,menuItem("1. Upload", tabName = "upload", icon = icon("upload"))
             ,menuItem("2. Inspect",icon=icon("search"),tabName="inspect")
             ,menuItem("3. Explore",icon=icon("bar-chart"),tabName="explore")
-            # ,plotOutput('plot_worth_putting_here')
+            ,br()
+            ,br()
+            ,p("Developed by: ",
+               br(),
+               "Noah C. Pollock",
+               br(),
+               a(href = "https://github.com/ncpollock/shiny_bi", "Code on GitHub"),
+               align="center")
         )
     ),
     
@@ -28,15 +33,13 @@ ui <- dashboardPage(
         tags$head(tags$style(custom_colors)),
         tabItems(
           tabItem(tabName = "about",
-                  h3("Welcome!"),
-                  p("This dashboard is a Business Intelligence (BI) tool built off of R using Shiny and related packages.
+                  box(title = "Welcome!",solidHeader = TRUE,status = "primary",collapsible = FALSE,width=12,
+                  h3("This dashboard is a Business Intelligence (BI) tool built off of R using Shiny and related packages.
                       Please consider it a proof of concept rather than a fully featured BI tool. There are many freely available
                       BI tools with much richer feature sets (e.g., Microsoft Power BI, Tableau, Excel). In fact,
                     this tool was heavily inspired by RapidMiner and JMP."),
-                  p("Follow the tabs to the left in numeric order to see what this dashboard can do!")
-                  # https://en.wikipedia.org/wiki/Business_intelligence_software
-                  # https://rapidminer.com/
-          ),
+                  h2("Follow the tabs to the left in numeric order to see what this dashboard can do!")
+          )),
           tabItem(tabName = "upload",
                   fluidRow(
                     box(title=p(icon("file-copy",class = "fas"),"Upload Data"),
@@ -62,20 +65,23 @@ ui <- dashboardPage(
                   fluidRow(
                     box(title="Inspect Data",status="primary",
                         width=12,
-                        p("Depending on the size of your dataset, this may take a minute or two..."),
+                        h2("Depending on the size of your dataset, this may take a minute or two..."),
                         uiOutput("inspect_vars")
                     ))),
           
           tabItem(tabName = "explore",
                   fluidRow(
                     column(width = 4,
-                      box(title="Plot Type",width=12,collapsible = TRUE,
+                      box(title="Plot Type",width=12,
+                          collapsible = TRUE,status="danger",solidHeader = TRUE,
                       selectInput("plot_type","Plot Type",
                                   c("Bar","Boxplot","Column","Heatmap","Line","Point"),
                                   selected = "Column")),
-                      box(title="Plot Axes and Groups",width=12,collapsible = TRUE,
+                      box(title="Plot Axes and Groups",width=12,
+                          collapsible = TRUE,status="danger",solidHeader = TRUE,
                           uiOutput("plot_axes")),
-                      box(title="Y-Value Stats",width=12,collapsed = TRUE,collapsible = TRUE,
+                      box(title="Y-Value Stats",width=12,
+                          collapsed = TRUE,collapsible = TRUE,status="danger",solidHeader = TRUE,
                           selectInput("plot_stats","Y-Value Stats",
                                       c("Sum","Average","Value"),
                                       selected = "Value"))

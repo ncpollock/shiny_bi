@@ -252,7 +252,7 @@ shinyServer(function(input, output, clientData, session) {
         
         # c(
           if(is.numeric(file_df()[[i]])){
-            list(box(width = 12,collapsible = TRUE,collapsed = FALSE,solidHeader = TRUE,status = 'primary',
+            list(box(width = 12,collapsible = TRUE,collapsed = FALSE,solidHeader = TRUE,status = 'success',
                        title=p(strong(i),": Variable is numeric"),
                        box(width=4,DT::dataTableOutput(stat_summaries)),
                      box(width=8,plotOutput(inspect_histogram),
@@ -264,7 +264,7 @@ shinyServer(function(input, output, clientData, session) {
             # ))
           } else {
             list(
-              box(width = 12,collapsible = TRUE,collapsed = FALSE,solidHeader = TRUE,status = 'primary',
+              box(width = 12,collapsible = TRUE,collapsed = FALSE,solidHeader = TRUE,status = 'warning',
                   title=p(strong(i),": Variable is not numeric"),
               box(DT::dataTableOutput(level_counts),width=4),
               box(width=8,plotOutput(inspect_bar)))) }
