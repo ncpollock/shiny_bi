@@ -147,12 +147,12 @@ shinyServer(function(input, output, clientData, session) {
          input$plot_stats == "Average"){
         plot_df <- plot_df %>%
           group_by_at(.vars = vars(x_var,group_vars)) %>%
-          summarise(y_var = mean(!!y_var_sym))
+          summarise(y_var = mean(!!y_var_sym,na.rm = TRUE))
         gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var,group=color_var,color=color_var))
       }
       if(input$y_var != "None" &
          input$plot_stats == "Sum"){
-        plot_df <- summarise(plot_df,y_var = sum(!!y_var_sym))
+        plot_df <- summarise(plot_df,y_var = sum(!!y_var_sym,na.rm = TRUE))
         gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var,group=color_var,color=color_var))
       }
       
