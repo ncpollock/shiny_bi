@@ -172,7 +172,7 @@ shinyServer(function(input, output, clientData, session) {
       if(input$plot_type == "Column") gp <- gp + geom_col()
       if(input$plot_type == "Bar") gp <- gp + geom_col() + coord_flip()
       if(input$plot_type == "Heatmap") gp <- gp + geom_bin2d()
-      if(input$plot_type == "Boxplot") gp <- gp + geom_boxplot()
+      if(input$plot_type == "Boxplot") gp <- gp + geom_boxplot(color="black")
       if(input$plot_type == "Line") gp <- gp + geom_line()
       if(input$plot_type == "Point") gp <- gp + geom_point()
       
@@ -249,11 +249,11 @@ shinyServer(function(input, output, clientData, session) {
         level_counts <- paste0("table1_",i)
         stat_summaries <- paste0("table2_",i)
         textname_var <- paste("text", i, sep="")
+        selected_row <- paste("sr", i, sep="")
         
         inspect_histogram <- paste0("plot1_",i)
         inspect_bar <- paste0("plot2_",i)
         
-        # c(
           if(is.numeric(file_df()[[i]])){
             list(box(width = 12,collapsible = TRUE,collapsed = FALSE,solidHeader = TRUE,status = 'success',
                        title=p(strong(i),": Variable is numeric"),
@@ -265,12 +265,13 @@ shinyServer(function(input, output, clientData, session) {
                                      min = 1,  max = 50,value = ifelse(2*nrow(file_df())^(1/3)>50,50,2*nrow(file_df())^(1/3))
                                      ))
                      ))
-            # ))
+
           } else {
             list(
               box(width = 12,collapsible = TRUE,collapsed = FALSE,solidHeader = TRUE,status = 'warning',
                   title=p(strong(i),": Variable is not numeric"),
-              box(DT::dataTableOutput(level_counts),width=4),
+              box(DT::dataTableOutput(level_counts),width=4,
+                  textOutput(selected_row)),
               box(width=8,plotOutput(inspect_bar)))) }
         
         # could add in other checks for dates, booleans, etc
@@ -301,6 +302,10 @@ shinyServer(function(input, output, clientData, session) {
           stat_summaries <- paste0("table2_", my_i)
           inspect_histogram <- paste0("plot1_",my_i)
           inspect_bar <- paste0("plot2_",my_i)
+          
+          #get selected table indice
+          selected_row <- paste("sr", my_i, sep="")
+          output[[selected_row]] <- renderText(input[[paste0("table1_",my_i,"_rows_selected")]])
           
           #initialize empty space
           output$none <- renderPlot({})
@@ -346,14 +351,19 @@ shinyServer(function(input, output, clientData, session) {
                         geom_vline(aes(xintercept = median(!!j,na.rm = TRUE),color="median"),size = 1.7) +
                         geom_vline(aes(xintercept = mean(!!j,na.rm = TRUE),color="mean"),size = 2) +
                         scale_color_manual(name = "Stats", values = c(median = "black", mean = "orange")) +
+                        # to align maintain alignment with boxplot
+                        scale_x_continuous(limits = c(min(file_df()[[my_i]],na.rm = TRUE)
+                                                      ,max(file_df()[[my_i]],na.rm = TRUE))) +
                         my_theme +
                         theme(legend.position = 'top'),
-                      ggplot(file_df(),aes(x=!!j)) +
+                      ggplot(file_df()) +
                         geom_boxplot(aes(y=!!j,x=1),fill = "gray50") +
+                        geom_hline(aes(yintercept = median(!!j,na.rm = TRUE),color="median"),size = 1.7) +
+                        geom_hline(aes(yintercept = mean(!!j,na.rm = TRUE),color="mean"),size = 2) +
+                        scale_color_manual(name = "Stats", values = c(median = "black", mean = "orange")) +
                         coord_flip() +
                         my_theme +
-                        theme(axis.text = element_blank(),
-                              axis.title.y = element_blank()),
+                        theme(axis.title = element_blank()),
                       rel_heights=c(3,1),
                       align = "v",
                       nrow = 2
@@ -362,7 +372,16 @@ shinyServer(function(input, output, clientData, session) {
           
           output[[inspect_bar]] <- renderPlot({
             
-            ggplot(file_df() %>% count(!!j),aes(x=!!j,y=n)) +
+            selected <- input[[paste0(level_counts,"_rows_selected")]]
+            
+            test_df <- file_df() %>%
+              count(!!j)
+            test_df <- test_df %>%
+              mutate(selected = ifelse(!!j == test_df[my_i,selected],"Selected","Not"))
+            
+            ggplot(test_df,aes(x=!!j,y=n,fill=selected)) +
+            # ggplot(file_df() %>% count(!!j),aes(x=!!j,y=n)) +
+              scale_fill_manual( values = c("Selected" = "red", "Not" = "gray"), guide = FALSE ) +
               geom_col() +
               coord_flip() +
               my_theme
