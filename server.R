@@ -270,8 +270,7 @@ shinyServer(function(input, output, clientData, session) {
             list(
               box(width = 12,collapsible = TRUE,collapsed = FALSE,solidHeader = TRUE,status = 'warning',
                   title=p(strong(i),": Variable is not numeric"),
-              box(DT::dataTableOutput(level_counts),width=4,
-                  textOutput(selected_row)),
+              box(DT::dataTableOutput(level_counts),width=4),
               box(width=8,plotOutput(inspect_bar)))) }
         
         # could add in other checks for dates, booleans, etc
@@ -305,19 +304,24 @@ shinyServer(function(input, output, clientData, session) {
           
           #get selected table indice
           selected_row <- paste("sr", my_i, sep="")
-          output[[selected_row]] <- renderText(input[[paste0("table1_",my_i,"_rows_selected")]])
+          output[[selected_row]] <- renderText(
+            as.character(
+              distinct(file_df(),!!j)[input[[paste0("table1_",my_i,"_rows_selected")]],]
+            )
+            )
           
           #initialize empty space
           output$none <- renderPlot({})
           
           output[[level_counts]] <- DT::renderDataTable({
-            datatable(count(file_df(),!!j)
+            datatable(count(file_df(),!!j) # should save this as a more global var, used several times
                       ,rownames = FALSE
                       ,colnames = c(paste0(my_i," Level"),
                                     "Count")
                       ,options = list(dom='ftp'
                                       ,initComplete = dt_column_head
-                                      ,search = list(regex = TRUE, caseInsensitive = FALSE)))
+                                      ,search = list(regex = TRUE, caseInsensitive = FALSE)
+                                      ,ordering=FALSE))
           })
           
           output[[stat_summaries]] <- DT::renderDataTable({
@@ -326,6 +330,7 @@ shinyServer(function(input, output, clientData, session) {
               summarise(Min = min(!!j,na.rm = TRUE),
                         Max = max(!!j,na.rm = TRUE),
                         Mean = mean(!!j,na.rm = TRUE),
+                        SD = sd(!!j,na.rm = TRUE),
                         Median = median(!!j,na.rm = TRUE),
                         Distinct = n_distinct(!!j),
                         Missing = sum(ifelse(is.na(!!j),1,0))) %>% 
@@ -346,17 +351,27 @@ shinyServer(function(input, output, clientData, session) {
           
           output[[inspect_histogram]] <- renderPlot({
             
-            plot_grid(ggplot(file_df(),aes(x=!!j)) +
+            pdata <- file_df() %>%
+              mutate(fill_val = ifelse(abs(!!j) > (mean(!!j) + (sd(!!j))),"Tail","Not"))
+            
+            plot_grid(ggplot(pdata,aes(x=!!j)) +
                         geom_histogram(bins = input[[paste0("inspect_bin",my_i)]]) +
-                        geom_vline(aes(xintercept = median(!!j,na.rm = TRUE),color="median"),size = 1.7) +
+                        #stat lines
+                        geom_vline(aes(xintercept = median(!!j,na.rm = TRUE),color="median"),size = 2) +
                         geom_vline(aes(xintercept = mean(!!j,na.rm = TRUE),color="mean"),size = 2) +
-                        scale_color_manual(name = "Stats", values = c(median = "black", mean = "orange")) +
-                        # to align maintain alignment with boxplot
+                        
+                        # cutoff lines
+                        geom_vline(aes(xintercept=(mean(!!j) + sd(!!j)),color="cutoff"),size=1.5) +
+                        geom_vline(aes(xintercept=(mean(!!j) - sd(!!j)),color="cutoff"),size=1.5) +
+                        
+                        scale_color_manual(name = "Stats", 
+                                           values = c(median = "black", mean = "orange",cutoff = "red")) +
+                        # to maintain alignment with boxplot
                         scale_x_continuous(limits = c(min(file_df()[[my_i]],na.rm = TRUE)
                                                       ,max(file_df()[[my_i]],na.rm = TRUE))) +
                         my_theme +
                         theme(legend.position = 'top'),
-                      ggplot(file_df()) +
+                      ggplot(pdata) +
                         geom_boxplot(aes(y=!!j,x=1),fill = "gray50") +
                         geom_hline(aes(yintercept = median(!!j,na.rm = TRUE),color="median"),size = 1.7) +
                         geom_hline(aes(yintercept = mean(!!j,na.rm = TRUE),color="mean"),size = 2) +
@@ -372,15 +387,14 @@ shinyServer(function(input, output, clientData, session) {
           
           output[[inspect_bar]] <- renderPlot({
             
-            selected <- input[[paste0(level_counts,"_rows_selected")]]
+            row_indice <- input[[paste0("table1_",my_i,"_rows_selected")]]
+            row_value <- as.character(distinct(file_df(),!!j)[row_indice,])
+          
+            pdata <- file_df() %>%
+              count(!!j) %>%
+              mutate(selected = ifelse(!!j %in% row_value,"Selected","Not"))
             
-            test_df <- file_df() %>%
-              count(!!j)
-            test_df <- test_df %>%
-              mutate(selected = ifelse(!!j == test_df[my_i,selected],"Selected","Not"))
-            
-            ggplot(test_df,aes(x=!!j,y=n,fill=selected)) +
-            # ggplot(file_df() %>% count(!!j),aes(x=!!j,y=n)) +
+            ggplot(pdata,aes(x=!!j,y=n,fill=selected)) +
               scale_fill_manual( values = c("Selected" = "red", "Not" = "gray"), guide = FALSE ) +
               geom_col() +
               coord_flip() +

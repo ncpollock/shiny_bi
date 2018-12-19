@@ -105,7 +105,8 @@ ui <- dashboardPage(
                            tags$li("Major improvements to graphing (it barely works as is)."),
                            tags$li("Analyze tab where the user can input variables into statistical models."),
                            tags$li("Toggle variable types (e.g., convert numeric to string and vice versa."),
-                           tags$li("Allow the user to create new variables (e.g., transformations / mutations).")
+                           tags$li("Data cleaning and feature engineering (e.g., filter, recode, and mutate)."),
+                           tags$li("Join multiple datasets.")
                          )
                          )))
                   
