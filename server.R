@@ -93,7 +93,7 @@ shinyServer(function(input, output, clientData, session) {
 
     output$explore_chart <- renderPlot({
       
-      # there's probably better ways to accomplish this
+      # there's probably a better way to accomplish this
       # i have a lot of conditional logic that repeats code
       
       plot_df <- file_df()
@@ -139,10 +139,12 @@ shinyServer(function(input, output, clientData, session) {
         plot_df <- count(plot_df,x_var)
         gp <- ggplot(plot_df,aes(x=x_var,y=n,fill=color_var,group=color_var,color=color_var))
       }
+      
       if(input$y_var != "None" &
          input$plot_stats == "Value"){
         gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var,group=color_var,color=color_var))
       }
+      
       if(input$y_var != "None" &
          input$plot_stats == "Average"){
         plot_df <- plot_df %>%
@@ -150,9 +152,12 @@ shinyServer(function(input, output, clientData, session) {
           summarise(y_var = mean(!!y_var_sym,na.rm = TRUE))
         gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var,group=color_var,color=color_var))
       }
+      
       if(input$y_var != "None" &
          input$plot_stats == "Sum"){
-        plot_df <- summarise(plot_df,y_var = sum(!!y_var_sym,na.rm = TRUE))
+        plot_df <- plot_df %>%
+          group_by_at(.vars = vars(x_var,group_vars)) %>%
+          summarise(y_var = sum(!!y_var_sym,na.rm = TRUE))
         gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var,group=color_var,color=color_var))
       }
       
@@ -161,18 +166,32 @@ shinyServer(function(input, output, clientData, session) {
       
       # remove legend if not grouped
       # need a solution for when faceted but not colored!
-      if(!(plot_df %>% is.grouped_df())) gp <- gp + guides(fill=FALSE)
+      if(is.null(group_vars)) gp <- gp + guides(fill=FALSE)
+      
       
       # fix axis labels
       gp <- gp + 
         xlab(input$x_var) +
         ylab(ifelse(input$y_var=="None","Frequency",""))
       
+      # add features
+      if(input$expl_label == TRUE) gp <- gp + geom_text(aes(label=y_var))
+      
       # apply chosen plot type
       if(input$plot_type == "Column") gp <- gp + geom_col()
       if(input$plot_type == "Bar") gp <- gp + geom_col() + coord_flip()
       if(input$plot_type == "Heatmap") gp <- gp + geom_bin2d()
-      if(input$plot_type == "Boxplot") gp <- gp + geom_boxplot(color="black")
+      # if(input$plot_type == "Boxplot") gp <- gp + geom_boxplot(color="black")
+      if(input$plot_type == "Boxplot"){
+        if(is.null(group_vars)){
+          gp <- gp + geom_boxplot(aes(fill = NULL, group = NULL, color = NULL),color="black")
+        } else {
+          gp <- gp + geom_boxplot(color="black")
+        }
+      } 
+      
+        # geom_boxplot(aes(group=x_var),color="black")
+        # geom_boxplot(aes(x=y_var,y=x_var),color="black")
       if(input$plot_type == "Line") gp <- gp + geom_line()
       if(input$plot_type == "Point") gp <- gp + geom_point()
       
