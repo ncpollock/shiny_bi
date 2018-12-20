@@ -80,12 +80,7 @@ ui <- dashboardPage(
                                   selected = "Column")),
                       box(title="Plot Axes and Groups",width=12,
                           collapsible = TRUE,status="danger",solidHeader = TRUE,
-                          uiOutput("plot_axes")),
-                      box(title="Y-Value Stats",width=12,
-                          collapsed = TRUE,collapsible = TRUE,status="danger",solidHeader = TRUE,
-                          selectInput("plot_stats","Y-Value Stats",
-                                      c("Sum","Average","Value"),
-                                      selected = "Value"))
+                          uiOutput("plot_axes"))
                     ),
                     column(width=8,
                       box(title="Explore Data",status="primary",collapsible = TRUE,width=12,
@@ -94,7 +89,22 @@ ui <- dashboardPage(
                           hr(syle = "color: black; hieght = 50px")
                           # dataTableOutput("explore_chart_table")
                     )
-                  )))
+                  ),
+                  column(width=12,
+                  box(title="Y-Value Stats",width=4,
+                      collapsed = TRUE,collapsible = TRUE,status="danger",solidHeader = TRUE,
+                      selectInput("plot_stats","Y-Value Stats",
+                                  c("Sum","Average","Value"),
+                                  selected = "Value")),
+                  box(title="Features",width=8,
+                      collapsed = TRUE,collapsible = TRUE,status="danger",solidHeader = TRUE,
+                      column(width=6,
+                             checkboxInput("expl_legend", "Legend", FALSE),
+                             checkboxInput("expl_label", "Data Labels", FALSE)),
+                      column(width=6,
+                      numericInput("expl_size", "Size: ", value = 1)))
+                  )
+                  ))
           
           ,tabItem("wishlist",
                    fluidRow(
@@ -102,7 +112,8 @@ ui <- dashboardPage(
                          width=12,
                          h1("Future updates on the wishlist:"),
                          tags$ul(
-                           tags$li("Major improvements to graphing (it barely works as is)."),
+                           tags$li("Major improvements to graphing (it barely works as is).
+                                   Including feature toggling such as the legend and labels"),
                            tags$li("Analyze tab where the user can input variables into statistical models."),
                            tags$li("Toggle variable types (e.g., convert numeric to string and vice versa."),
                            tags$li("Data cleaning and feature engineering (e.g., filter, recode, and mutate)."),
