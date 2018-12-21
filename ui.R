@@ -73,6 +73,7 @@ ui <- dashboardPage(
           tabItem(tabName = "explore",
                   fluidRow(
                     column(width = 4,
+                      # actionButton("init_plot", "Generate Chart!",icon = icon("arrow-circle-right")),
                       box(title="Plot Type",width=12,
                           collapsible = TRUE,status="danger",solidHeader = TRUE,
                       selectInput("plot_type","Plot Type",
@@ -97,12 +98,13 @@ ui <- dashboardPage(
                                   c("Sum","Average","Value"),
                                   selected = "Value")),
                   box(title="Features",width=8,
-                      collapsed = TRUE,collapsible = TRUE,status="danger",solidHeader = TRUE,
+                      collapsed = FALSE,collapsible = TRUE,status="danger",solidHeader = TRUE,
                       column(width=6,
-                             checkboxInput("expl_legend", "Legend", FALSE),
+                             checkboxInput("expl_legend", "Legend", TRUE),
                              checkboxInput("expl_label", "Data Labels", FALSE)),
+                              #make labels selectice input for style eg round(x), percent(), dollar()
                       column(width=6,
-                      numericInput("expl_size", "Size: ", value = 1)))
+                      numericInput("expl_size", "Size: ",1)))
                   )
                   ))
           
