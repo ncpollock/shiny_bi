@@ -100,11 +100,17 @@ ui <- dashboardPage(
                   box(title="Features",width=8,
                       collapsed = FALSE,collapsible = TRUE,status="danger",solidHeader = TRUE,
                       column(width=6,
-                             checkboxInput("expl_legend", "Legend", TRUE),
-                             checkboxInput("expl_label", "Data Labels", FALSE)),
-                              #make labels selectice input for style eg round(x), percent(), dollar()
+                             selectizeInput("expl_theme", 
+                                            "Toggle Chart Elements: ",
+                                            c("X-Axis","Y-Axis"), selected = c("X-Axis","Y-Axis"), multiple = TRUE
+                                            ,options = list(placeholder = 'Click to see options...')),
+                             sliderInput("expl_size", "Size: ",.5,min=0,max=1,step=.1)),
                       column(width=6,
-                      numericInput("expl_size", "Size: ",1)))
+                             checkboxInput("expl_legend", "Legend", TRUE),
+                             checkboxInput("expl_label", "Data Labels", FALSE)))
+                      #make labels selectize input for style eg round(x), percent(), dollar()
+                      # or eg any theme element such as ... x axis label, y axis label, x axis
+                      # color pallette and color picker using googlevis? like geom_tile?
                   )
                   ))
           

@@ -178,11 +178,11 @@ shinyServer(function(input, output, clientData, session) {
         ylab(ifelse(input$y_var=="None","Frequency",""))
       
       # apply chosen plot type
-      if(input$plot_type == "Column") gp <- gp + geom_col()
-      if(input$plot_type == "Bar") gp <- gp + geom_col() + coord_flip()
+      if(input$plot_type == "Column") gp <- gp + geom_col(width=input$expl_size)
+      if(input$plot_type == "Bar") gp <- gp + geom_col(width=input$expl_size) + coord_flip()
       if(input$plot_type == "Heatmap") gp <- gp + geom_bin2d()
-      if(input$plot_type == "Line") gp <- gp + geom_line()
-      if(input$plot_type == "Point") gp <- gp + geom_point()
+      if(input$plot_type == "Line") gp <- gp + geom_line(size=input$expl_size*8)
+      if(input$plot_type == "Point") gp <- gp + geom_point(size=input$expl_size*8)
       # if(input$plot_type == "Boxplot") gp <- gp + geom_boxplot(color="black")
       if(input$plot_type == "Boxplot"){
         if(is.null(group_vars)){
@@ -203,7 +203,9 @@ shinyServer(function(input, output, clientData, session) {
                                                          ,color="black"
                                                          ,position = position_stack(vjust = 0.5))
       if(input$expl_legend == FALSE) gp <- gp + theme(legend.position="none")
-     
+      if(!("X-Axis" %in% input$expl_theme)) gp <- gp + theme(axis.title.x = element_blank())
+      if(!("Y-Axis" %in% input$expl_theme)) gp <- gp + theme(axis.title.y = element_blank())
+      
       gp
       
     })
