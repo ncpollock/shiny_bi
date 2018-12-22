@@ -39,8 +39,8 @@ shinyServer(function(input, output, clientData, session) {
     
     output$full_dataset <- renderDataTable({
       
-      datatable(file_df())
-      
+      datatable(file_df(),filter='top',options=list(scrollX=TRUE))
+
     })
     
     output$file_columns <- renderInfoBox({
