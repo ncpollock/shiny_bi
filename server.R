@@ -180,6 +180,7 @@ shinyServer(function(input, output, clientData, session) {
       # apply chosen plot type
       if(input$plot_type == "Column") gp <- gp + geom_col(width=input$expl_size)
       if(input$plot_type == "Bar") gp <- gp + geom_col(width=input$expl_size) + coord_flip()
+      if(input$plot_type == "Histogram") gp <- ggplot(plot_df,aes(x=x_var,fill=color_var,group=color_var,color=color_var)) + geom_histogram()
       if(input$plot_type == "Heatmap") gp <- gp + geom_bin2d()
       if(input$plot_type == "Line") gp <- gp + geom_line(size=input$expl_size*8)
       if(input$plot_type == "Point") gp <- gp + geom_point(size=input$expl_size*8)
@@ -284,7 +285,7 @@ shinyServer(function(input, output, clientData, session) {
         
           if(is.numeric(file_df()[[i]])){
             list(box(width = 12,collapsible = TRUE,collapsed = FALSE,solidHeader = TRUE,status = 'success',
-                       title=p(strong(i),": Variable is numeric"),
+                       title=p(title_collapse(i),": Variable is numeric"),
                        box(width=4,DT::dataTableOutput(stat_summaries)),
                      box(width=8,plotOutput(inspect_histogram),
                          sliderInput(paste0("inspect_bin",i),
@@ -297,7 +298,7 @@ shinyServer(function(input, output, clientData, session) {
           } else {
             list(
               box(width = 12,collapsible = TRUE,collapsed = FALSE,solidHeader = TRUE,status = 'warning',
-                  title=p(strong(i),": Variable is not numeric"),
+                  title=p(title_collapse(i),": Variable is not numeric"),
               box(DT::dataTableOutput(level_counts),width=4),
               box(width=8,plotOutput(inspect_bar)))) }
         

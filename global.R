@@ -31,6 +31,14 @@ dt_column_head <- JS(
   "$(this.api().table().header()).css({'background-color': '#3d3d3d', 'color': '#fff'});",
   "}")
 
+# allow box collapse on title click
+title_collapse <- function(x){
+  HTML(
+    paste0('<strong class="box-title" data-widget="collapse" style="cursor: pointer;">'
+           ,x
+           ,'</strong>'))
+}
+
 # set general theme for ggplots
 my_theme <- theme(panel.background = element_blank(),
                   axis.text = element_text(size = '15'),

@@ -34,7 +34,7 @@ ui <- dashboardPage(
         tags$head(tags$style(custom_colors)),
         tabItems(
           tabItem(tabName = "about",
-                  box(title = "Welcome!",solidHeader = TRUE,status = "primary",collapsible = FALSE,width=12,
+                  box(title = "Welcome!",solidHeader = TRUE,status = "primary",width=12,
                   h3("This dashboard is a Business Intelligence (BI) tool built off of R using Shiny and related packages.
                       Please consider it a proof of concept rather than a fully featured BI tool. There are many freely available
                       BI tools with much richer feature sets (e.g., Microsoft Power BI, Tableau, Excel). In fact,
@@ -74,17 +74,17 @@ ui <- dashboardPage(
                   fluidRow(
                     column(width = 4,
                       # actionButton("init_plot", "Generate Chart!",icon = icon("arrow-circle-right")),
-                      box(title="Plot Type",width=12,
+                      box(title=title_collapse("Plot Type"),width=12,
                           collapsible = TRUE,status="danger",solidHeader = TRUE,
                       selectInput("plot_type","Plot Type",
-                                  c("Bar","Boxplot","Column","Heatmap","Line","Point"),
+                                  c("Bar","Boxplot","Column","Heatmap","Histogram","Line","Point"),
                                   selected = "Column")),
-                      box(title="Plot Axes and Groups",width=12,
+                      box(title=title_collapse("Plot Axes and Groups"),width=12,
                           collapsible = TRUE,status="danger",solidHeader = TRUE,
                           uiOutput("plot_axes"))
                     ),
                     column(width=8,
-                      box(title="Explore Data",status="primary",collapsible = TRUE,width=12,
+                      box(title=strong("Explore Data"),status="primary",width=12,
                           p("Explore your data visually. This may take some trial and error to get it right!"),
                           plotOutput('explore_chart'),
                           hr(syle = "color: black; hieght = 50px")
@@ -92,12 +92,12 @@ ui <- dashboardPage(
                     )
                   ),
                   column(width=12,
-                  box(title="Y-Value Stats",width=4,
+                  box(title=title_collapse("Y-Value Stats"),width=4,
                       collapsed = TRUE,collapsible = TRUE,status="danger",solidHeader = TRUE,
                       selectInput("plot_stats","Y-Value Stats",
                                   c("Sum","Average","Value"),
                                   selected = "Value")),
-                  box(title="Features",width=8,
+                  box(title=title_collapse("Plot Features"),width=8,
                       collapsed = FALSE,collapsible = TRUE,status="danger",solidHeader = TRUE,
                       column(width=6,
                              selectizeInput("expl_theme", 
@@ -123,7 +123,7 @@ ui <- dashboardPage(
                            tags$li("Major improvements to graphing (it barely works as is).
                                    Including feature toggling such as the legend and labels"),
                            tags$li("Analyze tab where the user can input variables into statistical models."),
-                           tags$li("Toggle variable types (e.g., convert numeric to string and vice versa."),
+                           tags$li("Toggle variable types (e.g., convert numeric to string and vice versa)."),
                            tags$li("Data cleaning and feature engineering (e.g., filter, recode, and mutate)."),
                            tags$li("Join multiple datasets.")
                          )
