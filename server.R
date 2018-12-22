@@ -8,12 +8,14 @@ shinyServer(function(input, output, clientData, session) {
       
       if(input$select_dataset!="Upload"){
         
-        pg_outcomes = read.csv("air_df.csv",stringsAsFactors = FALSE)
+        pg_outcomes_df <- read.csv("air_df.csv",stringsAsFactors = FALSE)
+        ed_api <- read.csv("ed_api_more.csv",stringsAsFactors = FALSE)
         
-        dataset_list <- list(PlantGrowth = PlantGrowth,
-                             iris = iris,
-                             diamonds = diamonds,
-                             "Post-Grad Outcomes" = pg_outcomes)
+        dataset_list <- list(PlantGrowth = PlantGrowth
+                             ,iris = iris
+                             ,diamonds = diamonds
+                             ,"Post-Grad Outcomes" = pg_outcomes_df
+                             ,"Department of Education API" = ed_api)
         
         file_df <- data.frame(
           dataset_list[[input$select_dataset]])
@@ -299,10 +301,11 @@ shinyServer(function(input, output, clientData, session) {
             list(
               box(width = 12,collapsible = TRUE,collapsed = FALSE,solidHeader = TRUE,status = 'warning',
                   title=p(title_collapse(i),": Variable is not numeric"),
-              box(DT::dataTableOutput(level_counts),width=4),
-              box(width=8,plotOutput(inspect_bar)))) }
+              box(DT::dataTableOutput(level_counts),width=12)
+              # ,box(width=8,plotOutput(inspect_bar)) # if I want to go back to plots for character vars
+              )) }
         
-        # could add in other checks for dates, booleans, etc
+        # could add in other checks for dates, booleans, lat/lon/geo, etc
         
           # ,list(p("Each variable gets either a plot or a table, but every variable gets this nice paragraphs.")))
       })
@@ -343,14 +346,22 @@ shinyServer(function(input, output, clientData, session) {
           output$none <- renderPlot({})
           
           output[[level_counts]] <- DT::renderDataTable({
-            datatable(file_df() %>% count(!!j) %>% arrange(desc(n)) # should save this as a more global var, used several times
+            tdata <- file_df() %>% count(!!j) %>% mutate(pct = percent(n/sum(n),2)) %>% arrange(desc(n))
+            datatable(tdata # should save this as a more global var, used several times
                       ,rownames = FALSE
                       ,colnames = c(paste0(my_i," Level"),
-                                    "Count")
+                                    "Count",
+                                    "Percent")
                       ,options = list(dom='ftp'
                                       ,initComplete = dt_column_head
                                       ,search = list(regex = TRUE, caseInsensitive = FALSE)
-                                      ,ordering=FALSE))
+                                      ,ordering=FALSE)) %>%
+              formatStyle(
+                'n',
+                background = styleColorBar(range(0,max(tdata$n)), sunshine),
+                backgroundSize = '98% 75%',
+                backgroundRepeat = 'no-repeat',
+                backgroundPosition = 'center')
           })
           
           output[[stat_summaries]] <- DT::renderDataTable({

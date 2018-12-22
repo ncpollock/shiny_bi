@@ -17,17 +17,21 @@ ui <- dashboardPage(
             ,menuItem("Wishlist",icon=icon("gift"),tabName="wishlist")
             ,br()
             ,br()
-            ,p("Developed by: ",
+            ,p(strong("Developed by: "),
                br(),
-               "Noah C. Pollock",
+               a(href="https://ncpollock.github.io/"
+                 ,target="_blank"
+                 ,"Noah C. Pollock"),
                br(),
-               a(href = "https://github.com/ncpollock/shiny_bi", "Code on GitHub"),
+               a(href = "https://github.com/ncpollock/shiny_bi"
+                 ,target="_blank"
+                 ,"Code on GitHub"),
                align="center")
         )
     ),
     
     body <- dashboardBody(
-        tags$head( #from UCM
+        tags$head(
             tags$link(rel = "stylesheet", type = "text/css", href = "https://fonts.googleapis.com/css?family=Roboto:300italic,400,700")
         ),
         style="font-family: 'Roboto';",
@@ -39,7 +43,7 @@ ui <- dashboardPage(
                       Please consider it a proof of concept rather than a fully featured BI tool. There are many freely available
                       BI tools with much richer feature sets (e.g., Microsoft Power BI, Tableau, Excel). In fact,
                     this tool was heavily inspired by RapidMiner and JMP."),
-                  h2("Follow the tabs to the left in numeric order to see what this dashboard can do!")
+                  h3("Follow the tabs to the left in numeric order to see what this dashboard can do!")
           )),
           tabItem(tabName = "upload",
                   fluidRow(
@@ -53,7 +57,9 @@ ui <- dashboardPage(
                                              ".csv")),
                         h4("Don't have any data to upload?"),
                         selectInput('select_dataset',"Choose a Dataset Instead: ",
-                                    c("Upload","Post-Grad Outcomes","iris","diamonds","PlantGrowth"),
+                                    c("Upload","Post-Grad Outcomes"
+                                      ,"Department of Education API"
+                                      ,"iris","diamonds","PlantGrowth"),
                                     selected = "Upload")
                         ),
                     infoBoxOutput('file_columns'),
@@ -66,9 +72,9 @@ ui <- dashboardPage(
                   fluidRow(
                     box(title="Inspect Data",status="primary",
                         width=12,
-                        h2("Depending on the size of your dataset, this may take a minute or two..."),
+                        h2("Depending on the size of your dataset, this may take a minute or two...")),
                         uiOutput("inspect_vars")
-                    ))),
+                    )),
           
           tabItem(tabName = "explore",
                   fluidRow(
@@ -120,8 +126,7 @@ ui <- dashboardPage(
                          width=12,
                          h1("Future updates on the wishlist:"),
                          tags$ul(
-                           tags$li("Major improvements to graphing (it barely works as is).
-                                   Including feature toggling such as the legend and labels"),
+                           tags$li("More feature toggling in Explore tab including: smoothing lines, color pallette"),
                            tags$li("Analyze tab where the user can input variables into statistical models."),
                            tags$li("Toggle variable types (e.g., convert numeric to string and vice versa)."),
                            tags$li("Data cleaning and feature engineering (e.g., filter, recode, and mutate)."),
