@@ -3,8 +3,8 @@
 v_light_gray <- '#a3a3a3' #'#CDCDCD'
 med_gray <- '#696969' #"#808080"
 v_dark_gray <- '#323232' #'#252525'
-maroon1 <- '#24292e' # '#8c001a'
-maroon2 <- '#7d430e'
+plum <- '#24292e' # '#8c001a'
+chocolate <- '#7d430e'
 
 #test color pallette
 electric_lime <- '#88D317'
@@ -20,6 +20,7 @@ library(shinyBS)
 library(DT)
 library(googleVis)
 library(ggplot2)
+library(scales)
 library(dplyr)
 library(tidyr)
 library(maps)
