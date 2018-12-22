@@ -343,7 +343,7 @@ shinyServer(function(input, output, clientData, session) {
           output$none <- renderPlot({})
           
           output[[level_counts]] <- DT::renderDataTable({
-            datatable(count(file_df(),!!j) # should save this as a more global var, used several times
+            datatable(file_df() %>% count(!!j) %>% arrange(desc(n)) # should save this as a more global var, used several times
                       ,rownames = FALSE
                       ,colnames = c(paste0(my_i," Level"),
                                     "Count")
@@ -417,17 +417,25 @@ shinyServer(function(input, output, clientData, session) {
           output[[inspect_bar]] <- renderPlot({
             
             row_indice <- input[[paste0("table1_",my_i,"_rows_selected")]]
-            row_value <- as.character(distinct(file_df(),!!j)[row_indice,])
+            row_value <- (
+              (file_df() %>%
+                count(!!j) %>%
+                arrange(desc(n)) %>%
+                distinct(!!j))[row_indice,])[[my_i]]
+            # row_value <- as.character(distinct(file_df(),!!j)[row_indice,])
           
             pdata <- file_df() %>%
               count(!!j) %>%
-              mutate(selected = ifelse(!!j %in% row_value,"Selected","Not"))
+              mutate(selected = ifelse(!!j %in% row_value,"Selected","Not")) %>%
+              arrange(n) %>%
+              mutate(x_var = factor(!!j,levels = !!j))
             
-            ggplot(pdata,aes(x=!!j,y=n,fill=selected)) +
+            ggplot(pdata,aes(x=x_var,y=n,fill=selected)) +
               scale_fill_manual( values = c("Selected" = "red", "Not" = "gray"), guide = FALSE ) +
               geom_col() +
               coord_flip() +
-              my_theme
+              my_theme +
+              theme(axis.title = element_blank())
           })
         })
       }
