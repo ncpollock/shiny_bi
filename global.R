@@ -1,8 +1,10 @@
 
 #initialize colors
 v_light_gray <- '#a3a3a3' #'#CDCDCD'
+v_light_gray2 <- '#bebebe'
 med_gray <- '#696969' #"#808080"
 v_dark_gray <- '#323232' #'#252525'
+v_dark_gray2 <- '#595959'
 plum <- '#24292e' # '#8c001a'
 chocolate <- '#7d430e'
 
