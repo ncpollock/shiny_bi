@@ -1,7 +1,8 @@
 
 
 
-ui <- dashboardPage(
+ui <- tagList(tags$link(rel = "stylesheet", type = "text/css", href = "my_style.css")
+              ,dashboardPage(
     dashboardHeader(title = "Shiny Business Intelligence Tool",
                     titleWidth = 450),
     
@@ -10,14 +11,20 @@ ui <- dashboardPage(
             br()
             ,HTML("<i class='fa fa-cogs' style='display:block; font-size: 50px; text-align: center;'></i>")
             ,br()
-            ,menuItem("About",tabName = "about", icon = icon("question"))
             ,menuItem("1. Upload", tabName = "upload", icon = icon("upload"))
             ,menuItem("2. Inspect",icon=icon("search"),tabName="inspect")
             ,menuItem("3. Explore",icon=icon("bar-chart"),tabName="explore")
             ,menuItem("Wishlist",icon=icon("gift"),tabName="wishlist")
+            ,menuItem("About",tabName = "about", icon = icon("question")
+                      ,fluidPage(style="white-space: normal;"
+                                 , p("This dashboard is a Business Intelligence (BI) tool built with the R language and Shiny-related packages.
+                      Please consider it a proof of concept rather than a fully featured production-worthy BI tool. There are many freely available
+                          BI tools with much richer feature sets (e.g., Microsoft Power BI, Tableau, Excel). This tool was heavily inspired by RapidMiner and JMP.")
+                      ))
             ,br()
             ,br()
-            ,p(strong("Developed by: "),
+            ,p(img(src="headshot.jpg",id="face-img",align="center"),br()
+               ,strong("Developed by: "),
                br(),
                a(href="https://ncpollock.github.io/"
                  ,target="_blank"
@@ -37,14 +44,6 @@ ui <- dashboardPage(
         style="font-family: 'Roboto';",
         tags$head(tags$style(custom_colors)),
         tabItems(
-          tabItem(tabName = "about",
-                  box(title = "Welcome!",solidHeader = TRUE,status = "primary",width=12,
-                  h3("This dashboard is a Business Intelligence (BI) tool built off of R using Shiny and related packages.
-                      Please consider it a proof of concept rather than a fully featured BI tool. There are many freely available
-                      BI tools with much richer feature sets (e.g., Microsoft Power BI, Tableau, Excel). In fact,
-                    this tool was heavily inspired by RapidMiner and JMP."),
-                  h3("Follow the tabs to the left in numeric order to see what this dashboard can do!")
-          )),
           tabItem(tabName = "upload",
                   fluidRow(
                     box(title=p(icon("file-copy",class = "fas"),"Upload Data"),
@@ -103,9 +102,9 @@ ui <- dashboardPage(
                       selectInput("plot_stats","Y-Value Stats",
                                   c("Sum","Average","Value"),
                                   selected = "Value")),
-                  box(title=title_collapse("Plot Features"),width=8,
-                      collapsed = FALSE,collapsible = TRUE,status="danger",solidHeader = TRUE,
-                      column(width=6,
+                  tabBox(title=strong("Plot Features"),width=8,height = "250px"
+                         , tabPanel("Text/Labels"
+                      , column(width=6,
                              selectizeInput("expl_theme", 
                                             "Toggle Chart Elements: ",
                                             c("X-Axis","Y-Axis"), selected = c("X-Axis","Y-Axis"), multiple = TRUE
@@ -114,6 +113,11 @@ ui <- dashboardPage(
                       column(width=6,
                              checkboxInput("expl_legend", "Legend", TRUE),
                              checkboxInput("expl_label", "Data Labels", FALSE)))
+                      , tabPanel("Color"
+                                 # pick from a few paalletes?
+                                 # select individual elements?
+                      )
+                  )
                       #make labels selectize input for style eg round(x), percent(), dollar()
                       # or eg any theme element such as ... x axis label, y axis label, x axis
                       # color pallette and color picker using googlevis? like geom_tile?
@@ -145,4 +149,5 @@ ui <- dashboardPage(
         )
         )
 
-)
+) # dashboardpage
+) # taglist
