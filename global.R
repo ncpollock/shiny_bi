@@ -27,6 +27,8 @@ library(dplyr)
 library(tidyr)
 library(maps)
 library(cowplot)
+library(colourpicker)
+library(shinyWidgets) # nicer inputs
 
 # style column names / header for datatables
 dt_column_head <- JS(
