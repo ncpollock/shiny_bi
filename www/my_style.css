@@ -1,0 +1,21 @@
+
+/* my face */
+#face-img {
+  border-radius: 70%;
+  border: 1px solid #ddd;
+  padding: 3px;
+  margin-left: 10px;
+  width:85px; /* you can use % */
+  height: auto;
+}  
+
+.my_button {
+  background-color: #fda302;
+  color: black !important;
+  font-weight: bold !important;
+}
+
+.my_button:hover {
+  background-color: rgb(254, 212, 139);
+}
+
