@@ -356,7 +356,7 @@ shinyServer(function(input, output, clientData, session) {
               c(detail = "Levels",
                 value = nrow(tdata)),
               c(detail = "Level Count Range",
-                value = paste0(range(tdata$n),collapse = ",")),
+                value = paste0(range(tdata$n),collapse = " - ")),
               c(detail = "Missing/Blank Values",
                 value = (tdata %>% filter(is.na(!!j)))$n))
             
@@ -377,10 +377,9 @@ shinyServer(function(input, output, clientData, session) {
                       ,colnames = c(paste0(my_i," Level"),
                                     "Count",
                                     "Percent")
-                      ,options = list(dom='ftp'
+                      ,options = list(dom='tpf'
                                       ,initComplete = dt_column_head
                                       ,search = list(regex = TRUE, caseInsensitive = FALSE)
-                                      # ,ordering=FALSE
                                       ,columnDefs = list(list(className = 'dt-center', targets = 1:2)))) %>%
               formatStyle(
                 my_i,'n',
