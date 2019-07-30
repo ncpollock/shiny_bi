@@ -124,6 +124,8 @@ shinyServer(function(input, output, clientData, session) {
                facet_var = ifelse(rep(TRUE,nrow(plot_df)) & 
                                     input$facet_var=="None","None",as.character(!!facet_var_sym)))
       
+      if(is.numeric(file_df()[[input$color_var]])) plot_df$color_var <- as.numeric(plot_df$color_var)
+      
       # put color and facet groups into vector for grouping
       group_vars <- NULL
       if(input$color_var != "None"){
@@ -177,7 +179,7 @@ shinyServer(function(input, output, clientData, session) {
       # fix axis labels
       gp <- gp + 
         xlab(input$x_var) +
-        ylab(ifelse(input$y_var=="None","Frequency",""))
+        ylab(ifelse(input$y_var=="None","Frequency",input$y_var))
       
       # apply chosen plot type
       if(input$plot_type == "Column") gp <- gp + geom_col(width=input$expl_size)
@@ -199,15 +201,34 @@ shinyServer(function(input, output, clientData, session) {
         # geom_boxplot(aes(x=y_var,y=x_var),color="black")
       
       #apply custom theme
-      gp <- gp + my_theme
+      gp <- gp + my_theme + 
+        theme(text = element_text(color = input$expl_color_text)
+              , title = element_text(color = input$expl_color_text)
+              , axis.text = element_text(color = input$expl_color_text))
       
       # add features
-      if(input$expl_label == TRUE) gp <- gp + geom_label(aes(label=y_var)
-                                                         ,color="black"
+      if(!("Legend" %in% input$expl_theme)) gp <- gp + theme(legend.position="none")
+      if("Data Labels" %in% input$expl_theme) gp <- gp + geom_label(aes(label=y_var)
+                                                         ,color=input$expl_color_data_labels
                                                          ,position = position_stack(vjust = 0.5))
-      if(input$expl_legend == FALSE) gp <- gp + theme(legend.position="none")
       if(!("X-Axis" %in% input$expl_theme)) gp <- gp + theme(axis.title.x = element_blank())
       if(!("Y-Axis" %in% input$expl_theme)) gp <- gp + theme(axis.title.y = element_blank())
+      
+      # colors
+      expl_pallette <- rep_len(
+        c(input$expl_color_1,input$expl_color_2,input$expl_color_3,input$expl_color_4,input$expl_color_5,input$expl_color_6)
+        , length.out = nrow(plot_df) #inefficient
+      )
+      
+      # discrete
+      if(!(is.numeric(file_df()[[input$color_var]]))){
+      gp <- gp + scale_color_manual(values =expl_pallette)
+      gp <- gp + scale_fill_manual(values=expl_pallette)
+      } else {
+        # continuous
+        gp <- gp + scale_color_gradient(low = expl_pallette[1], high = expl_pallette[2])
+        gp <- gp + scale_fill_gradient(low = expl_pallette[1], high = expl_pallette[2])
+      }
       
       gp
       
