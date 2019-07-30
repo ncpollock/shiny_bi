@@ -1,3 +1,8 @@
+# improvements
+  # let user pick which vars to "Inspect"
+  # more charting options
+  # only show upload option when upload is selected
+
 
 #initialize colors
 v_light_gray <- '#a3a3a3' #'#CDCDCD'
