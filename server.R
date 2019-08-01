@@ -208,7 +208,7 @@ shinyServer(function(input, output, clientData, session) {
       
       # add features
       if(!("Legend" %in% input$expl_theme)) gp <- gp + theme(legend.position="none")
-      if("Data Labels" %in% input$expl_theme) gp <- gp + geom_label(aes(label=y_var)
+      if("Data Labels" %in% input$expl_theme) gp <- gp + geom_text(aes(label=y_var)
                                                          ,color=input$expl_color_data_labels
                                                          ,position = position_stack(vjust = 0.5))
       if(!("X-Axis" %in% input$expl_theme)) gp <- gp + theme(axis.title.x = element_blank())
