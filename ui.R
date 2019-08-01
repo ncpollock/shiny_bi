@@ -103,41 +103,41 @@ ui <- tagList(tags$link(rel = "stylesheet", type = "text/css", href = "my_style.
                                   c("Sum","Average","Value"),
                                   selected = "Value")),
                   tabBox(title=strong("Plot Features"),width=8,height = "250px"
-                         , tabPanel("Toggle Features"
-                      , column(width=12,
-                             selectizeInput("expl_theme", width = "100%"
-                                            ,"Toggle Chart Elements: "
-                                            , c("X-Axis","Y-Axis","Legend","Data Labels"), selected = c("X-Axis","Y-Axis"), multiple = TRUE
-                                            ,options = list(placeholder = 'Click to see options...'))
-                             )
-                      # , column(width=6,
-                      #        checkboxInput("expl_legend", "Legend", TRUE),
-                      #        checkboxInput("expl_label", "Data Labels", FALSE))
+                      , tabPanel("Toggle Features"
+                        , column(width=12,
+                               selectizeInput("expl_theme", width = "100%"
+                                              ,"Toggle Chart Elements: "
+                                              , c("X-Axis","Y-Axis","Legend","Data Labels"), selected = c("X-Axis","Y-Axis"), multiple = TRUE
+                                              ,options = list(placeholder = 'Click to see options...'))
+                               )
+                      )
+                      , tabPanel("Modify Features"
+                                 , sliderInput("expl_size", "Geometry Size: ",.5,min=0,max=1,step=.1)
+                                 # only show features for items that are toggled!
+                                 # data label formatting eg $, %, ##.##
+                                 # main title, x-title, y-title
+                                 # legend position
+                                 # gridlines
                       )
                       , tabPanel("Color"
                                  , column(width = 6, colourInput("expl_color_text", "Plot Text", "black"))
                                  , column(width = 6,colourInput("expl_color_data_labels", "Data Labels", "white"))
                                  , h3("General Palette")
                                  , column(width=6
-                                  , colourInput("expl_color_1", "Color #1", "blue")
-                                  , colourInput("expl_color_2", "Color #2", "black")
-                                  , colourInput("expl_color_3", "Color #3", "red")
+                                          , colourInput("expl_color_1", "Color #1", "blue")
+                                          , colourInput("expl_color_2", "Color #2", "black")
+                                          , colourInput("expl_color_3", "Color #3", "red")
                                  )
                                  , column(width=6
-                                   , colourInput("expl_color_4", "Color #4", "pink")
-                                   , colourInput("expl_color_5", "Color #5", "orange")
-                                   , colourInput("expl_color_6", "Color #6", "gray")
+                                          , colourInput("expl_color_4", "Color #4", "green")
+                                          , colourInput("expl_color_5", "Color #5", "orange")
+                                          , colourInput("expl_color_6", "Color #6", "gray")
                                  )
                                  # individual element vs. pallette
                       )
-                      , tabPanel("Modify Features"
-                                 , sliderInput("expl_size", "Geometry Size: ",.5,min=0,max=1,step=.1)
-                                 # gridlines
-                      )
                   )
                       #make labels selectize input for style eg round(x), percent(), dollar()
-                      # or eg any theme element such as ... x axis label, y axis label, x axis
-                      # color pallette and color picker using googlevis? like geom_tile?
+
                   )
                   ))
           
