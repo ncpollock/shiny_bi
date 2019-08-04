@@ -465,7 +465,9 @@ shinyServer(function(input, output, clientData, session) {
                         scale_color_manual(name = "Stats", values = c(median = "black", mean = "orange")) +
                         coord_flip() +
                         my_theme +
-                        theme(axis.title = element_blank()),
+                        theme(axis.title = element_blank()
+                              , axis.ticks.y = element_blank()
+                              , axis.text.y = element_blank()),
                       rel_heights=c(3,1),
                       align = "v",
                       nrow = 2
