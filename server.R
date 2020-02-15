@@ -144,29 +144,27 @@ shinyServer(function(input, output, clientData, session) {
         plot_df <- plot_df %>%
           group_by_at(.vars = vars(x_var,group_vars)) %>%
           summarise(y_var = n())
-        gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var,group=color_var,color=color_var))
-      }
+      } # if
       
       if(input$y_var != "None" &
          input$plot_stats == "Value"){
-        gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var,group=color_var,color=color_var))
-      }
+      } # if
       
       if(input$y_var != "None" &
          input$plot_stats == "Average"){
         plot_df <- plot_df %>%
           group_by_at(.vars = vars(x_var,group_vars)) %>%
           summarise(y_var = mean(!!y_var_sym,na.rm = TRUE))
-        gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var,group=color_var,color=color_var))
-      }
+      } # if
       
       if(input$y_var != "None" &
          input$plot_stats == "Sum"){
         plot_df <- plot_df %>%
           group_by_at(.vars = vars(x_var,group_vars)) %>%
           summarise(y_var = sum(!!y_var_sym,na.rm = TRUE))
-        gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var,group=color_var,color=color_var))
-      }
+      } # if
+      
+      gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var,group=color_var,color=color_var))
       
       # apply facet if applicable
       if(input$facet_var != "None") gp <- gp + facet_wrap(~facet_var)
@@ -174,7 +172,6 @@ shinyServer(function(input, output, clientData, session) {
       # remove legend if not grouped
       # need a solution for when faceted but not colored!
       if(is.null(group_vars)) gp <- gp + guides(fill=FALSE,color=FALSE)
-      
       
       # fix axis labels
       gp <- gp + 
@@ -188,17 +185,85 @@ shinyServer(function(input, output, clientData, session) {
       if(input$plot_type == "Heatmap") gp <- gp + geom_bin2d()
       if(input$plot_type == "Line") gp <- gp + geom_line(size=input$expl_size*8)
       if(input$plot_type == "Point") gp <- gp + geom_point(size=input$expl_size*8)
-      # if(input$plot_type == "Boxplot") gp <- gp + geom_boxplot(color="black")
       if(input$plot_type == "Boxplot"){
         if(is.null(group_vars)){
           gp <- gp + geom_boxplot(aes(x=as.character(x_var),fill = NULL, group = NULL, color = NULL),color="black")
         } else {
           gp <- gp + geom_boxplot(aes(x=as.character(x_var),group=as.character(x_var)),color="black")
         }
-      } 
-      
-        # geom_boxplot(aes(group=x_var),color="black")
-        # geom_boxplot(aes(x=y_var,y=x_var),color="black")
+      } # if boxplot
+      if(input$plot_type == "Project Network"){
+        # project_df <- data.frame(
+        #   id = 1:7
+        #   , activity = c("start","middle A","middle B","almost there A","end","middle C","almost there B")
+        #   , timeslot = c(1,2,2,3,4,2,3)
+        #   , id_before = c(NA,1,1,"2,6","3,4,7",1,2) # predecessor
+        #   , time_needed = c(2,2,4,5,1,3,5)
+        # ) %>%
+        project_df <- data.frame(
+          id = 1:8
+          , activity = c("Design Reqs","Assign Team","Design Hardware","Code Software"
+                         ,"Build and Test HW","Dev. Patent Request","Test Software","Integrate Systems")
+          , timeslot = c(1,2,2,3,3,3,4,5)
+          , id_before = c(NA,1,1,2,3,3,4,"7,6,5") # predecessor
+          , time_needed = c(14,6,34,27,70,22,49,21)
+        ) %>%
+          
+          # expand multivalued id_before
+          separate_rows(id_before,sep=",") %>%
+          mutate_at(vars("id_before"),as.integer)
+        
+        project_df <- project_df %>%
+          # going to
+          left_join(project_df %>% 
+                      group_by(id_before) %>% 
+                      summarise(timeslot_next = max(timeslot)) %>%
+                      filter(!is.na(id_before))
+                    ,by = c("id" = "id_before"))
+        
+        project_df <- project_df %>%
+          left_join(project_df %>% 
+                      distinct(id,timeslot,timeslot_next) %>%
+                      group_by(timeslot) %>%
+                      # closer timeslots are in lower layers
+                      arrange(timeslot_next) %>%
+                      mutate(row_layer = 1:n()) %>%
+                      ungroup() %>%
+                      select(id,row_layer)
+                    , by = "id") %>%
+          ungroup()  %>%
+          # avoid merge activities being added as multiple layers
+          group_by(id) %>%
+          mutate(row_layer = min(row_layer)) %>%
+          ungroup() 
+        # coming from
+        
+        project_df <- project_df %>%
+          left_join(project_df %>%
+                      mutate(row_layer_pred = row_layer # row_layer before
+                             , timeslot_pred = timeslot # timeslot before
+                      ) %>%
+                      select(id,row_layer_pred,timeslot_pred) %>%
+                      distinct(),by = c("id_before" = "id")) %>%
+          mutate(row_layer_pred = ifelse(is.na(row_layer_pred),1,row_layer_pred)
+                 , activity_width = .5
+                 , activity_height = .8)
+        
+        
+        gp <- ggplot(project_df, aes(x = timeslot, y = row_layer
+                               , width = activity_width
+        )) +
+          geom_segment(aes(x = timeslot_pred+.25, xend = timeslot-.25, y=row_layer_pred,yend = row_layer)
+                       , arrow = arrow(length = unit(0.3, "inches"))
+                       , size = 1.5) + 
+          geom_tile(aes(fill = time_needed, height = activity_height), colour = "grey50") +
+          geom_text(aes(label = activity,y = row_layer+.25)) +
+          geom_text(aes(label = paste("Time:",time_needed),y=row_layer)) +
+          geom_text(aes(label = paste("ID:",id),y =row_layer-.25)) +
+          scale_fill_gradient(low="yellow",high = "red") +
+          theme_void() +
+          theme(legend.position = 'none')
+      } # if project network
       
       #apply custom theme
       gp <- gp + my_theme + 
@@ -222,8 +287,8 @@ shinyServer(function(input, output, clientData, session) {
       
       # discrete
       if(!(is.numeric(file_df()[[input$color_var]]))){
-      gp <- gp + scale_color_manual(values =expl_pallette)
-      gp <- gp + scale_fill_manual(values=expl_pallette)
+      gp <- gp + scale_color_manual(values = expl_pallette)
+      gp <- gp + scale_fill_manual(values = expl_pallette)
       } else {
         # continuous
         gp <- gp + scale_color_gradient(low = expl_pallette[1], high = expl_pallette[2])
