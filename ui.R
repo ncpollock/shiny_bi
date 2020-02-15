@@ -3,7 +3,7 @@
 
 ui <- tagList(tags$link(rel = "stylesheet", type = "text/css", href = "my_style.css")
               ,dashboardPage(
-    dashboardHeader(title = "Shiny Business Intelligence Tool",
+    dashboardHeader(title = "Shiny BI",
                     titleWidth = 450),
     
     sidebar <- dashboardSidebar(
@@ -18,7 +18,7 @@ ui <- tagList(tags$link(rel = "stylesheet", type = "text/css", href = "my_style.
             ,menuItem("About",tabName = "about", icon = icon("question")
                       ,fluidPage(style="white-space: normal;"
                                  , p("This dashboard is a Business Intelligence (BI) tool built with the R language and Shiny-related packages.
-                      Please consider it a proof of concept rather than a fully featured production-worthy BI tool. There are many freely available
+                      Please consider it a proof of concept rather than a fully featured production-worthy BI tool. There are many freely available and inexpensive 
                           BI tools with much richer feature sets (e.g., Microsoft Power BI, Tableau, Excel). This tool was heavily inspired by RapidMiner and JMP.")
                       ))
             ,br()
@@ -56,9 +56,12 @@ ui <- tagList(tags$link(rel = "stylesheet", type = "text/css", href = "my_style.
                                              ".csv")),
                         h4("Don't have any data to upload?"),
                         selectInput('select_dataset',"Choose a Dataset Instead: ",
-                                    c("Upload","Post-Grad Outcomes"
-                                      ,"Department of Education API"
-                                      ,"iris","diamonds","PlantGrowth"),
+                                    list("Upload"
+                                         , "Fabricated" = list("Post-Grad Outcomes")
+                                         , "Real World" = list("Department of Education API")
+                                         , "Common in R" = list("iris","diamonds","PlantGrowth")
+                                         , "Special" = list("Project Management")
+                                      ),
                                     selected = "Upload")
                         ),
                     infoBoxOutput('file_columns'),
@@ -82,7 +85,11 @@ ui <- tagList(tags$link(rel = "stylesheet", type = "text/css", href = "my_style.
                       box(title=title_collapse("Plot Type"),width=12,
                           collapsible = TRUE,status="danger",solidHeader = TRUE,
                       selectInput("plot_type","Plot Type",
-                                  c("Bar","Boxplot","Column","Heatmap","Histogram","Line","Point"),
+                                  list(
+                                    "Standard" = c("Bar","Column","Line","Point")
+                                    , "Advanced" = c("Heatmap","Histogram","Boxplot")
+                                    , "Special" = c("Project Network","")
+                                    ),
                                   selected = "Column")),
                       box(title=title_collapse("Plot Axes and Groups"),width=12,
                           collapsible = TRUE,status="danger",solidHeader = TRUE,
@@ -107,21 +114,26 @@ ui <- tagList(tags$link(rel = "stylesheet", type = "text/css", href = "my_style.
                         , column(width=12,
                                selectizeInput("expl_theme", width = "100%"
                                               ,"Toggle Chart Elements: "
-                                              , c("X-Axis","Y-Axis","Legend","Data Labels"), selected = c("X-Axis","Y-Axis"), multiple = TRUE
-                                              ,options = list(placeholder = 'Click to see options...'))
+                                              , c("X-Axis Title","X-Axis Labels","Y-Axis Title","Y-Axis Labels","Legend","Data Labels")
+                                              , selected = c("X-Axis Title","X-Axis Labels","Y-Axis Labels")
+                                              , multiple = TRUE,options = list(placeholder = 'Click to see options...'))
                                )
                       )
                       , tabPanel("Modify Features"
                                  , sliderInput("expl_size", "Geometry Size: ",.5,min=0,max=1,step=.1)
+                                 , selectInput("expl_legend","Legend Position"
+                                               ,c("top","right","bottom","left"),"top")
                                  # only show features for items that are toggled!
                                  # data label formatting eg $, %, ##.##
                                  # main title, x-title, y-title
-                                 # legend position
                                  # gridlines
+                                 # alpha / opacity
                       )
-                      , tabPanel("Color"
-                                 , column(width = 6, colourInput("expl_color_text", "Plot Text", "black"))
-                                 , column(width = 6,colourInput("expl_color_data_labels", "Data Labels", "white"))
+                      , tabPanel("Colors"
+                                 , fluidRow(column(width = 6, colourInput("expl_color_text", "Other Text", "black"))
+                                 , column(width = 6,colourInput("expl_color_data_labels", "Data Labels", "black"))
+                                 , column(width = 6,colourInput("expl_color_panel", "Panel Background", "white"))
+                                 , column(width = 6,colourInput("expl_color_axis", "Axis Lines and Labels", "black"))
                                  , h3("General Palette")
                                  , column(width=6
                                           , colourInput("expl_color_1", "Color #1", "blue")
@@ -133,7 +145,7 @@ ui <- tagList(tags$link(rel = "stylesheet", type = "text/css", href = "my_style.
                                           , colourInput("expl_color_5", "Color #5", "orange")
                                           , colourInput("expl_color_6", "Color #6", "gray")
                                  )
-                                 # individual element vs. pallette
+                                 ) # flidRow
                       )
                   )
                       #make labels selectize input for style eg round(x), percent(), dollar()

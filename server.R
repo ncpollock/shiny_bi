@@ -10,12 +10,21 @@ shinyServer(function(input, output, clientData, session) {
         
         pg_outcomes_df <- read.csv("air_df.csv",stringsAsFactors = FALSE)
         ed_api <- read.csv("ed_api_more.csv",stringsAsFactors = FALSE)
+        project_df <- data.frame(
+          id = 1:8
+          , activity = c("Design Reqs","Assign Team","Design Hardware","Code Software"
+                         ,"Build and Test HW","Dev. Patent Request","Test Software","Integrate Systems")
+          , timeslot = c(1,2,2,3,3,3,4,5)
+          , id_before = c(NA,1,1,2,3,3,4,"7,6,5") # predecessor
+          , time_needed = c(14,6,34,27,70,22,49,21)
+        )
         
         dataset_list <- list(PlantGrowth = PlantGrowth
                              ,iris = iris
                              ,diamonds = diamonds
                              ,"Post-Grad Outcomes" = pg_outcomes_df
-                             ,"Department of Education API" = ed_api)
+                             ,"Department of Education API" = ed_api
+                             ,"Project Management" = project_df)
         
         file_df <- data.frame(
           dataset_list[[input$select_dataset]])
@@ -146,6 +155,7 @@ shinyServer(function(input, output, clientData, session) {
           summarise(y_var = n())
       } # if
       
+      # handle stat transformations ---------------------------
       if(input$y_var != "None" &
          input$plot_stats == "Value"){
       } # if
@@ -163,6 +173,53 @@ shinyServer(function(input, output, clientData, session) {
           group_by_at(.vars = vars(x_var,group_vars)) %>%
           summarise(y_var = sum(!!y_var_sym,na.rm = TRUE))
       } # if
+      
+      # handle special chart types ---------------------------
+      if(input$plot_type=="Project Network"){
+        
+        plot_df <- plot_df %>%
+          # expand multivalued id_before
+          separate_rows(id_before,sep=",") %>%
+          mutate_at(vars(c("id","id_before")),as.character)
+        
+        plot_df <- plot_df %>%
+          # going to
+          left_join(plot_df %>% 
+                      group_by(id_before) %>% 
+                      summarise(timeslot_next = max(timeslot)) %>%
+                      filter(!is.na(id_before))
+                    ,by = c("id" = "id_before"))
+        
+        plot_df <- plot_df %>%
+          left_join(plot_df %>% 
+                      distinct(id,timeslot,timeslot_next) %>%
+                      group_by(timeslot) %>%
+                      # closer timeslots are in lower layers
+                      arrange(timeslot_next) %>%
+                      mutate(row_layer = 1:n()) %>%
+                      ungroup() %>%
+                      select(id,row_layer)
+                    , by = "id") %>%
+          ungroup()  %>%
+          # avoid merge activities being added as multiple layers
+          group_by(id) %>%
+          mutate(row_layer = min(row_layer)) %>%
+          ungroup() 
+        # coming from
+        
+        plot_df <- plot_df %>%
+          left_join(plot_df %>%
+                      mutate(row_layer_pred = row_layer # row_layer before
+                             , timeslot_pred = timeslot # timeslot before
+                      ) %>%
+                      select(id,row_layer_pred,timeslot_pred) %>%
+                      distinct(),by = c("id_before" = "id")) %>%
+          mutate(row_layer_pred = ifelse(is.na(row_layer_pred),1,row_layer_pred)
+                 , activity_width = .5
+                 , activity_height = .8)
+        
+      } # if project network
+      
       
       gp <- ggplot(plot_df,aes(x=x_var,y=y_var,fill=color_var,group=color_var,color=color_var))
       
@@ -193,91 +250,44 @@ shinyServer(function(input, output, clientData, session) {
         }
       } # if boxplot
       if(input$plot_type == "Project Network"){
-        # project_df <- data.frame(
-        #   id = 1:7
-        #   , activity = c("start","middle A","middle B","almost there A","end","middle C","almost there B")
-        #   , timeslot = c(1,2,2,3,4,2,3)
-        #   , id_before = c(NA,1,1,"2,6","3,4,7",1,2) # predecessor
-        #   , time_needed = c(2,2,4,5,1,3,5)
-        # ) %>%
-        project_df <- data.frame(
-          id = 1:8
-          , activity = c("Design Reqs","Assign Team","Design Hardware","Code Software"
-                         ,"Build and Test HW","Dev. Patent Request","Test Software","Integrate Systems")
-          , timeslot = c(1,2,2,3,3,3,4,5)
-          , id_before = c(NA,1,1,2,3,3,4,"7,6,5") # predecessor
-          , time_needed = c(14,6,34,27,70,22,49,21)
-        ) %>%
-          
-          # expand multivalued id_before
-          separate_rows(id_before,sep=",") %>%
-          mutate_at(vars("id_before"),as.integer)
         
-        project_df <- project_df %>%
-          # going to
-          left_join(project_df %>% 
-                      group_by(id_before) %>% 
-                      summarise(timeslot_next = max(timeslot)) %>%
-                      filter(!is.na(id_before))
-                    ,by = c("id" = "id_before"))
-        
-        project_df <- project_df %>%
-          left_join(project_df %>% 
-                      distinct(id,timeslot,timeslot_next) %>%
-                      group_by(timeslot) %>%
-                      # closer timeslots are in lower layers
-                      arrange(timeslot_next) %>%
-                      mutate(row_layer = 1:n()) %>%
-                      ungroup() %>%
-                      select(id,row_layer)
-                    , by = "id") %>%
-          ungroup()  %>%
-          # avoid merge activities being added as multiple layers
-          group_by(id) %>%
-          mutate(row_layer = min(row_layer)) %>%
-          ungroup() 
-        # coming from
-        
-        project_df <- project_df %>%
-          left_join(project_df %>%
-                      mutate(row_layer_pred = row_layer # row_layer before
-                             , timeslot_pred = timeslot # timeslot before
-                      ) %>%
-                      select(id,row_layer_pred,timeslot_pred) %>%
-                      distinct(),by = c("id_before" = "id")) %>%
-          mutate(row_layer_pred = ifelse(is.na(row_layer_pred),1,row_layer_pred)
-                 , activity_width = .5
-                 , activity_height = .8)
-        
-        
-        gp <- ggplot(project_df, aes(x = timeslot, y = row_layer
+        gp <- ggplot(plot_df, aes(x = timeslot, y = row_layer
                                , width = activity_width
         )) +
           geom_segment(aes(x = timeslot_pred+.25, xend = timeslot-.25, y=row_layer_pred,yend = row_layer)
-                       , arrow = arrow(length = unit(0.3, "inches"))
-                       , size = 1.5) + 
-          geom_tile(aes(fill = time_needed, height = activity_height), colour = "grey50") +
-          geom_text(aes(label = activity,y = row_layer+.25)) +
-          geom_text(aes(label = paste("Time:",time_needed),y=row_layer)) +
-          geom_text(aes(label = paste("ID:",id),y =row_layer-.25)) +
-          scale_fill_gradient(low="yellow",high = "red") +
-          theme_void() +
-          theme(legend.position = 'none')
+                       , arrow = arrow(length = unit(input$expl_size/2, "inches"))
+                       , size = input$expl_size*2) + 
+          geom_tile(aes(fill = time_needed), colour = "grey50", height = input$expl_size) +
+          geom_text(aes(label = activity,y = row_layer+.25),color=input$expl_color_data_labels) +
+          geom_text(aes(label = paste("Time:",time_needed),y=row_layer),color=input$expl_color_data_labels) +
+          geom_text(aes(label = paste("ID:",id),y = row_layer-.25),color=input$expl_color_data_labels) +
+          theme_void()
       } # if project network
       
-      #apply custom theme
+      #apply custom colors
       gp <- gp + my_theme + 
         theme(text = element_text(color = input$expl_color_text)
               , title = element_text(color = input$expl_color_text)
-              , axis.text = element_text(color = input$expl_color_text))
+              , plot.background = element_rect(fill = input$expl_color_panel)
+              , panel.background = element_rect(fill = input$expl_color_panel)
+              , axis.text = element_text(color = input$expl_color_axis)
+              , axis.line.x.bottom = element_line(color = input$expl_color_axis)
+              , axis.line.y.left = element_line(color = input$expl_color_axis)
+              , axis.ticks = element_line(color = input$expl_color_axis)
+              )
       
       # add features
-      if(!("Legend" %in% input$expl_theme)) gp <- gp + theme(legend.position="none")
       if("Data Labels" %in% input$expl_theme) gp <- gp + geom_text(aes(label=y_var)
                                                          ,color=input$expl_color_data_labels
                                                          ,position = position_stack(vjust = 0.5))
-      if(!("X-Axis" %in% input$expl_theme)) gp <- gp + theme(axis.title.x = element_blank())
-      if(!("Y-Axis" %in% input$expl_theme)) gp <- gp + theme(axis.title.y = element_blank())
+      
+      gp <- gp + theme(
+        legend.position = if("Legend" %in% input$expl_theme){ input$expl_legend} else {'none'}
+        , axis.title.x = if(!("X-Axis Title" %in% input$expl_theme)) element_blank()
+        , axis.text.x = if(!("X-Axis Labels" %in% input$expl_theme)) element_blank()
+        , axis.title.y = if(!("Y-Axis Title" %in% input$expl_theme)) element_blank()
+        , axis.text.y = if(!("Y-Axis Labels" %in% input$expl_theme)) element_blank()
+      )
       
       # colors
       expl_pallette <- rep_len(
